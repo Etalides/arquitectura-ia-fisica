@@ -1,0 +1,2461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arquitectura de la Inteligencia Física | Prof. Etalides E. Bonillo</title>
+<meta name="description" content="Tratado académico de Ingeniería Ciberfísica - Convergencia de Materiales, Diseño, Sensores y Código en la Era de la IA">
+<style>
+  /* ===== RESET Y VARIABLES ===== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0e1a;
+    --bg-soft: #111827;
+    --bg-card: #1a2234;
+    --bg-card-hover: #243044;
+    --text: #e5e7eb;
+    --text-dim: #9ca3af;
+    --text-muted: #6b7280;
+    --accent: #06b6d4;
+    --accent-2: #8b5cf6;
+    --accent-3: #f59e0b;
+    --accent-4: #10b981;
+    --accent-5: #ef4444;
+    --border: rgba(255,255,255,0.06);
+    --border-light: rgba(255,255,255,0.12);
+    --code-bg: #0d1117;
+    --shadow: 0 20px 60px rgba(0,0,0,0.5);
+    --radius: 16px;
+    --radius-sm: 8px;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+    --font-math: 'Cambria Math', 'Latin Modern Math', Georgia, serif;
+  }
+
+  [data-theme="light"] {
+    --bg: #f6f8fa;
+    --bg-soft: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f0f2f5;
+    --text: #1a1a2e;
+    --text-dim: #4a4a6a;
+    --text-muted: #8a8aaa;
+    --border: rgba(0,0,0,0.06);
+    --border-light: rgba(0,0,0,0.12);
+    --code-bg: #f3f4f6;
+    --shadow: 0 20px 60px rgba(0,0,0,0.08);
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    font-size: 17px;
+    transition: background 0.4s, color 0.4s;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent-2); }
+
+  /* ===== PROGRESS BAR ===== */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+    z-index: 1000;
+    transition: width 0.05s linear;
+    box-shadow: 0 0 20px rgba(6,182,212,0.3);
+  }
+
+  /* ===== THEME TOGGLE ===== */
+  .theme-toggle {
+    position: fixed;
+    top: 1.2rem;
+    right: 1.2rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 1.3rem;
+    z-index: 100;
+    transition: all var(--transition);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .theme-toggle:hover {
+    border-color: var(--accent);
+    transform: scale(1.08) rotate(8deg);
+    box-shadow: 0 0 30px rgba(6,182,212,0.15);
+  }
+
+  /* ===== PORTADA ===== */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 15% 15%, rgba(6,182,212,0.15), transparent 50%),
+      radial-gradient(ellipse at 85% 85%, rgba(139,92,246,0.15), transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(245,158,11,0.06), transparent 60%),
+      var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cover-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(6,182,212,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(6,182,212,0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    mask-image: radial-gradient(ellipse at center, black 25%, transparent 75%);
+    pointer-events: none;
+  }
+
+  .cover-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.3;
+    pointer-events: none;
+    animation: floatGlow 15s ease-in-out infinite;
+  }
+  .cover-glow-1 { width: 600px; height: 600px; background: #06b6d4; top: -150px; left: -150px; }
+  .cover-glow-2 { width: 600px; height: 600px; background: #8b5cf6; bottom: -150px; right: -150px; animation-delay: -7s; }
+  .cover-glow-3 { width: 400px; height: 400px; background: #f59e0b; top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: -3.5s; opacity: 0.1; }
+
+  @keyframes floatGlow {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(20px, -20px) scale(1.05); }
+    66% { transform: translate(-10px, 15px) scale(0.95); }
+  }
+
+  .cover-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 960px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .cover-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .cover-top .mark { color: var(--accent); }
+
+  .cover-title {
+    font-size: clamp(2.8rem, 8vw, 6rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.035em;
+  }
+  .cover-title .line {
+    display: block;
+    background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .cover-title .line.accent {
+    font-size: 0.5em;
+    font-weight: 300;
+    font-style: italic;
+    letter-spacing: 0.2em;
+    background: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 50%, #f59e0b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .cover-subtitle {
+    font-size: clamp(1rem, 1.8vw, 1.4rem);
+    color: var(--text-dim);
+    max-width: 700px;
+    margin: 0 auto;
+    font-weight: 300;
+  }
+  .cover-subtitle em { color: var(--accent); font-style: normal; font-weight: 600; }
+  .cover-subtitle strong {
+    background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+  }
+
+  .cover-disciplines {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 0.5rem;
+  }
+  .discipline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.8rem 1.2rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    min-width: 80px;
+    transition: all var(--transition);
+    backdrop-filter: blur(8px);
+  }
+  .discipline:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    background: rgba(6,182,212,0.08);
+    box-shadow: 0 8px 30px rgba(6,182,212,0.08);
+  }
+  .discipline .icon { font-size: 1.8rem; }
+  .discipline .label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-dim); }
+
+  .cover-author {
+    padding: 2.5rem 2rem;
+    background: linear-gradient(135deg, rgba(6,182,212,0.06), rgba(139,92,246,0.06));
+    border: 1px solid rgba(139,92,246,0.25);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover-author::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent);
+  }
+  .cover-author .label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: var(--text-dim);
+    margin-bottom: 0.6rem;
+  }
+  .cover-author .name {
+    font-size: clamp(2rem, 5vw, 3.8rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #ffffff 0%, #06b6d4 45%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .cover-author .creds {
+    margin-top: 0.8rem;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .cover-author .creds .sep { color: var(--accent); margin: 0 0.6rem; }
+
+  .cover-quote {
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 1.8rem 2.2rem;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--text-dim);
+    border-left: 3px solid var(--accent-2);
+    background: rgba(139,92,246,0.04);
+    border-radius: 0 12px 12px 0;
+    text-align: left;
+  }
+  .cover-quote cite {
+    display: block;
+    margin-top: 0.8rem;
+    font-size: 0.85rem;
+    color: var(--accent-2);
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .cover-bottom {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .cover-year {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+  .cover-year .line {
+    flex: 1;
+    max-width: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--text-dim), transparent);
+  }
+  .cover-year .num {
+    font-size: 1.1rem;
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    color: var(--text-dim);
+    font-family: 'Georgia', serif;
+  }
+  .cover-tagline {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--text-dim);
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    padding: 5rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at top, rgba(6,182,212,0.08), transparent 60%),
+      radial-gradient(ellipse at bottom, rgba(139,92,246,0.08), transparent 60%);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(6,182,212,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(6,182,212,0.04) 1px, transparent 1px);
+    background-size: 45px 45px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-content { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; }
+
+  .hero-badge {
+    display: inline-block;
+    padding: 0.4rem 1.2rem;
+    background: rgba(6,182,212,0.1);
+    border: 1px solid rgba(6,182,212,0.25);
+    border-radius: 100px;
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.2rem;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 50%, var(--accent-3) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p { font-size: clamp(1rem, 1.6vw, 1.25rem); color: var(--text-dim); max-width: 700px; margin: 0 auto 2.5rem; font-weight: 300; }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1.2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .stat {
+    padding: 1.5rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: all var(--transition);
+  }
+  .stat:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 8px 30px rgba(6,182,212,0.06);
+  }
+  .stat .num {
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stat .label { font-size: 0.8rem; color: var(--text-dim); margin-top: 0.2rem; }
+
+  /* ===== LAYOUT ===== */
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    max-width: 1440px;
+    margin: 0 auto;
+    gap: 2rem;
+    padding: 2rem;
+  }
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: 1fr; padding: 1.5rem; }
+    .sidebar { position: static !important; height: auto !important; }
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 2rem;
+    height: calc(100vh - 4rem);
+    overflow-y: auto;
+    padding: 1.8rem 1.5rem;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    scrollbar-width: thin;
+  }
+  .sidebar h3 {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .toc { list-style: none; }
+  .toc li { margin-bottom: 0.15rem; }
+  .toc a {
+    display: block;
+    padding: 0.4rem 0.8rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.85rem;
+    border-radius: var(--radius-sm);
+    border-left: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .toc a:hover {
+    color: var(--text);
+    background: var(--bg-card);
+    border-left-color: var(--accent);
+  }
+  .toc .part {
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 1rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.4rem 0.8rem;
+    opacity: 0.6;
+  }
+
+  .content { max-width: 900px; }
+
+  /* ===== CHAPTERS ===== */
+  .chapter {
+    margin-bottom: 6rem;
+    scroll-margin-top: 2rem;
+  }
+  .chapter-header {
+    padding: 2.5rem 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+  .chapter-header .num {
+    font-size: 0.8rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 0.4rem;
+  }
+  .chapter-header h2 {
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .chapter-lead {
+    font-size: 1.15rem;
+    color: var(--text-dim);
+    font-style: italic;
+    border-left: 3px solid var(--accent);
+    padding-left: 1.5rem;
+    margin: 2rem 0;
+  }
+  .chapter h3 {
+    font-size: 1.5rem;
+    margin: 3rem 0 1.2rem;
+    font-weight: 700;
+  }
+  .chapter h4 {
+    font-size: 1.15rem;
+    margin: 2rem 0 0.8rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .chapter p { margin-bottom: 1.2rem; }
+  .chapter ul, .chapter ol { margin: 1rem 0 1.5rem 1.8rem; }
+  .chapter li { margin-bottom: 0.4rem; }
+
+  /* ===== CALLOUTS ===== */
+  .callout {
+    padding: 1.5rem 1.8rem;
+    border-radius: var(--radius-sm);
+    margin: 2rem 0;
+    border-left: 4px solid;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left-width: 4px;
+  }
+  .callout-title {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .callout.concept { border-left-color: var(--accent); }
+  .callout.concept .callout-title { color: var(--accent); }
+  .callout.warning { border-left-color: var(--accent-3); }
+  .callout.warning .callout-title { color: var(--accent-3); }
+  .callout.insight { border-left-color: var(--accent-2); }
+  .callout.insight .callout-title { color: var(--accent-2); }
+  .callout.exercise { border-left-color: var(--accent-4); }
+  .callout.exercise .callout-title { color: var(--accent-4); }
+  .callout.math { border-left-color: var(--accent-5); }
+  .callout.math .callout-title { color: var(--accent-5); }
+
+  /* ===== EQUATIONS ===== */
+  .equation {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-2);
+    padding: 1.5rem 2rem;
+    margin: 1.5rem 0;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    font-family: var(--font-math);
+    font-size: 1.15rem;
+    overflow-x: auto;
+  }
+  .equation-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-align: right;
+    margin-top: 0.6rem;
+    font-family: var(--font);
+    font-style: italic;
+  }
+
+  /* ===== CODE ===== */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1.5rem 1.8rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    position: relative;
+    font-family: var(--font-mono);
+  }
+  pre .lang-tag {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.8rem;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: var(--font);
+  }
+  code { font-family: var(--font-mono); color: var(--text); }
+  .kw { color: #c084fc; }
+  .str { color: #86efac; }
+  .num { color: #fbbf24; }
+  .cmt { color: #6b7280; font-style: italic; }
+  .fn { color: #60a5fa; }
+  .type { color: #22d3ee; }
+  .pp { color: #f472b6; }
+
+  /* ===== TABLES ===== */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  th, td {
+    padding: 0.7rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--bg-card);
+    font-weight: 600;
+    color: var(--accent);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  tr:hover { background: rgba(6,182,212,0.03); }
+
+  /* ===== LAYER GRID ===== */
+  .layer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  .layer-card {
+    padding: 1.2rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    border-top: 3px solid;
+    transition: all var(--transition);
+  }
+  .layer-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+  .layer-card.mat { border-top-color: var(--accent-4); }
+  .layer-card.design { border-top-color: var(--accent-2); }
+  .layer-card.sensor { border-top-color: var(--accent); }
+  .layer-card.code { border-top-color: var(--accent-3); }
+  .layer-card.ai { border-top-color: var(--accent-5); }
+  .layer-card h5 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-dim); margin-bottom: 0.5rem; }
+  .layer-card p { font-size: 0.9rem; color: var(--text); }
+
+  /* ===== DIAGRAMS ===== */
+  .diagram {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 2rem;
+    margin: 2rem 0;
+    text-align: center;
+  }
+  .diagram svg { max-width: 100%; height: auto; }
+  .diagram-caption {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 1rem;
+    font-style: italic;
+  }
+
+  /* ===== REFERENCES ===== */
+  .ref-list {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1.5rem 2rem;
+    margin: 2rem 0;
+    font-size: 0.85rem;
+  }
+  .ref-list h4 {
+    color: var(--accent);
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .ref-list ol { padding-left: 1.5rem; color: var(--text-dim); }
+  .ref-list li { margin-bottom: 0.4rem; }
+
+  /* ===== QUOTE ===== */
+  blockquote {
+    font-size: 1.15rem;
+    font-style: italic;
+    color: var(--text-dim);
+    padding: 2rem 2.5rem;
+    border-left: 4px solid var(--accent-2);
+    background: var(--bg-card);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin: 2rem 0;
+    border: 1px solid var(--border);
+    border-left-width: 4px;
+  }
+  blockquote cite {
+    display: block;
+    margin-top: 0.8rem;
+    font-size: 0.85rem;
+    color: var(--text);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    text-align: center;
+    padding: 4rem 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+  footer strong { color: var(--text); }
+  footer .divider {
+    display: inline-block;
+    margin: 0 0.8rem;
+    color: var(--accent);
+  }
+
+  /* ===== ANIMATIONS ===== */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 640px) {
+    .cover { padding: 2rem 1.2rem; }
+    .cover-top { flex-direction: column; gap: 0.3rem; text-align: center; }
+    .cover-disciplines { gap: 0.4rem; }
+    .discipline { min-width: 60px; padding: 0.5rem 0.8rem; }
+    .discipline .icon { font-size: 1.4rem; }
+    .discipline .label { font-size: 0.55rem; }
+    .cover-author { padding: 1.8rem 1.2rem; }
+    .cover-quote { padding: 1.2rem 1.5rem; font-size: 1rem; }
+    .hero { padding: 3rem 1.2rem; }
+    .hero-stats { grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+    .stat { padding: 1rem 0.6rem; }
+    .stat .num { font-size: 1.6rem; }
+    .stat .label { font-size: 0.65rem; }
+    .equation { font-size: 1rem; padding: 1rem 1.2rem; }
+    pre { padding: 1rem 1.2rem; font-size: 0.75rem; }
+    .layout { padding: 1rem; gap: 1.5rem; }
+    .chapter { margin-bottom: 4rem; }
+    .chapter-header { padding: 1.5rem 0; }
+    .theme-toggle { top: 0.8rem; right: 0.8rem; width: 40px; height: 40px; font-size: 1rem; }
+    .layer-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 420px) {
+    .hero-stats { grid-template-columns: repeat(2, 1fr); }
+    .layer-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">🌙</button>
+
+<!-- ============ PORTADA ============ -->
+<section class="cover" id="portada" role="banner">
+  <div class="cover-grid"></div>
+  <div class="cover-glow cover-glow-1"></div>
+  <div class="cover-glow cover-glow-2"></div>
+  <div class="cover-glow cover-glow-3"></div>
+
+  <div class="cover-inner">
+    <div class="cover-top">
+      <span><span class="mark">◆</span> EDICIONES CIBERFÍSICAS <span class="mark">◆</span></span>
+      <span>Primera Edición Académica · 2026</span>
+    </div>
+
+    <h1 class="cover-title">
+      <span class="line">Arquitectura</span>
+      <span class="line accent">de la</span>
+      <span class="line">Inteligencia Física</span>
+    </h1>
+
+    <p class="cover-subtitle">
+      La convergencia de <em>Materiales</em>, <em>Diseño</em>,
+      <em>Sensores</em> y <em>Código</em> en la Era de la
+      <strong>Inteligencia Artificial</strong>
+    </p>
+
+    <div class="cover-disciplines">
+      <div class="discipline"><span class="icon">🧱</span><span class="label">Materiales</span></div>
+      <div class="discipline"><span class="icon">📐</span><span class="label">Diseño</span></div>
+      <div class="discipline"><span class="icon">📡</span><span class="label">Sensores</span></div>
+      <div class="discipline"><span class="icon">⚙️</span><span class="label">Código</span></div>
+      <div class="discipline"><span class="icon">🧠</span><span class="label">IA</span></div>
+    </div>
+
+    <div class="cover-author">
+      <div class="label">Obra escrita por</div>
+      <div class="name">Prof. Etalides E. Bonillo</div>
+      <div class="creds">
+        <span>Ingeniero</span><span class="sep">·</span>
+        <span>Docente</span><span class="sep">·</span>
+        <span>Investigador</span>
+      </div>
+    </div>
+
+    <blockquote class="cover-quote">
+      "La ingeniería del siglo XXI no dibuja planos: cultiva organismos.
+      No escribe código: entrena instintos. No selecciona materiales:
+      negocia con la termodinámica."
+      <cite>— E. E. Bonillo</cite>
+    </blockquote>
+
+    <div class="cover-bottom">
+      <div class="cover-year">
+        <span class="line"></span>
+        <span class="num">MMXXVI</span>
+        <span class="line"></span>
+      </div>
+      <div class="cover-tagline">Tratado de Ingeniería Ciberfísica</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HERO ============ -->
+<section class="hero" aria-label="Resumen del tratado">
+  <div class="hero-content">
+    <span class="hero-badge">⚡ Edición Académica Integral · 2026</span>
+    <h1>Tratado de Ingeniería Ciberfísica</h1>
+    <p>Un recorrido académico riguroso por los cinco pilares que sostienen los sistemas autónomos inteligentes del siglo XXI: desde la materia hasta el algoritmo, pasando por el diseño, la percepción y la ejecución en tiempo real.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="num">5</div><div class="label">Partes</div></div>
+      <div class="stat"><div class="num">13</div><div class="label">Capítulos</div></div>
+      <div class="stat"><div class="num">40+</div><div class="label">Ecuaciones</div></div>
+      <div class="stat"><div class="num">30+</div><div class="label">Algoritmos C++</div></div>
+      <div class="stat"><div class="num">120+</div><div class="label">Referencias</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LAYOUT ============ -->
+<div class="layout">
+  <aside class="sidebar" role="navigation" aria-label="Índice">
+    <h3>📚 Índice Académico</h3>
+    <ul class="toc">
+      <li><a href="#portada">📖 Portada</a></li>
+      <li><a href="#prologo">Manifiesto</a></li>
+      <li class="part">I · Percepción</li>
+      <li><a href="#cap1">1. Del interruptor a la red neuronal</a></li>
+      <li><a href="#cap2">2. IoT y Edge Computing</a></li>
+      <li><a href="#cap3">3. Fusión de sensores</a></li>
+      <li class="part">II · Sustrato Físico</li>
+      <li><a href="#cap4">4. Descubrimiento acelerado</a></li>
+      <li><a href="#cap5">5. Materiales inteligentes</a></li>
+      <li><a href="#cap6">6. Ingeniería verde e IA</a></li>
+      <li class="part">III · Geometría Cognitiva</li>
+      <li><a href="#cap7">7. Diseño generativo</a></li>
+      <li><a href="#cap8">8. Gemelos digitales</a></li>
+      <li><a href="#cap9">9. Tolerancias en manufactura aditiva</a></li>
+      <li class="part">IV · Motor de Ejecución</li>
+      <li><a href="#cap10">10. Por qué C++ para IA</a></li>
+      <li><a href="#cap11">11. C++ para robótica y visión</a></li>
+      <li><a href="#cap12">12. TinyML en sistemas embebidos</a></li>
+      <li class="part">V · Síntesis</li>
+      <li><a href="#cap13">13. Proyecto integrador</a></li>
+      <li class="part">Anexos</li>
+      <li><a href="#biblio">Bibliografía</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+
+    <!-- ============ PRÓLOGO ============ -->
+    <article class="chapter fade-in" id="prologo">
+      <div class="chapter-header">
+        <div class="num">Manifiesto</div>
+        <h2>El Fin de los Silos de la Ingeniería</h2>
+      </div>
+
+      <p class="chapter-lead">
+        La inteligencia, durante las primeras décadas de la computación, fue un fantasma atrapado en servidores lejanos. Pero la verdadera revolución de la IA no ocurre en la nube; ocurre cuando el algoritmo toca el barro, el metal y el silicio.
+      </p>
+
+      <p>Este tratado nace de una premisa fundamental: <strong>el software y el hardware han dejado de ser disciplinas separadas para convertirse en un único tejido ciberfísico</strong>. Ya no podemos diseñar un material sin pensar en cómo sus datos de fatiga serán leídos por sensores; no podemos programar un microcontrolador sin entender las limitaciones térmicas de los polímeros que lo rodean; y no podemos trazar una norma ISO sin saber que una IA generativa está a punto de redefinir la topología de esa pieza.</p>
+
+      <blockquote>
+        "La ingeniería del siglo XXI no dibuja planos: cultiva organismos. No escribe código: entrena instintos. No selecciona materiales: negocia con la termodinámica."
+        <cite>— E. E. Bonillo</cite>
+      </blockquote>
+
+      <h3>El Organismo Ciberfísico: Cinco Capas Integradas</h3>
+      <p>Imagina un sistema autónomo como un ser vivo. Necesita cinco capas integradas que operan en simbiosis:</p>
+
+      <div class="layer-grid">
+        <div class="layer-card mat">
+          <h5>🧱 Materiales</h5>
+          <p>El cuerpo. Aleaciones, polímeros, cerámicas, compuestos. Estructura cristalina, defectos, propiedades mecánicas.</p>
+        </div>
+        <div class="layer-card design">
+          <h5>📐 Diseño</h5>
+          <p>El ADN geométrico. Topología, tolerancias ISO, normalización UNE, manufactura aditiva y sustractiva.</p>
+        </div>
+        <div class="layer-card sensor">
+          <h5>📡 Sensores</h5>
+          <p>El sistema nervioso. Transductores, condicionamiento de señal, Arduino, Raspberry Pi, fusión sensorial.</p>
+        </div>
+        <div class="layer-card code">
+          <h5>⚙️ Código C++</h5>
+          <p>El cerebelo motor. RAII, templates, STL, determinismo, control de memoria, ejecución en tiempo real.</p>
+        </div>
+        <div class="layer-card ai">
+          <h5>🧠 IA</h5>
+          <p>La corteza cognitiva. Redes neuronales, aprendizaje profundo, inferencia en el borde, modelos generativos.</p>
+        </div>
+      </div>
+
+      <h3>Metodología del Tratado</h3>
+      <p>Cada capítulo sigue una estructura pedagógica rigurosa:</p>
+      <ol>
+        <li><strong>Fundamento teórico:</strong> principios físicos, matemáticos y computacionales.</li>
+        <li><strong>Modelado matemático:</strong> ecuaciones, algoritmos, demostraciones.</li>
+        <li><strong>Implementación en C++:</strong> código eficiente, moderno y determinista.</li>
+        <li><strong>Análisis de datos:</strong> estadística, procesamiento de señales, validación.</li>
+        <li><strong>Caso de estudio industrial:</strong> aplicación real documentada.</li>
+        <li><strong>Ejercicios y problemas:</strong> desde conceptuales hasta de implementación.</li>
+      </ol>
+
+      <div class="callout insight">
+        <div class="callout-title">🔮 Filosofía del Autor</div>
+        <p>Como señala Bjarne Stroustrup: <em>"Programming is understanding"</em> (Kristen Nygaard). Programar es comprender. Y comprender un sistema ciberfísico exige dominar simultáneamente la física del material, la geometría del diseño, la electrónica del sensor y la abstracción del código. Este tratado es una invitación a esa comprensión holística.</p>
+      </div>
+    </article>
+
+    <!-- ============ CAPÍTULO 1 ============ -->
+    <article class="chapter fade-in" id="cap1">
+      <div class="chapter-header">
+        <div class="num">Capítulo 01 · Parte I</div>
+        <h2>Del Interruptor a la Red Neuronal</h2>
+      </div>
+
+      <p class="chapter-lead">
+        Los sensores ya no son meros interruptores: son receptores sensoriales que alimentan redes neuronales con tensores de datos del mundo físico. Este capítulo establece el puente entre la electrónica clásica y el Machine Learning moderno.
+      </p>
+
+      <h3>1.1 Fundamentos Físicos del Sensor</h3>
+      <p>Un sensor es un <strong>transductor</strong>: convierte una magnitud física en una señal eléctrica mensurable. La relación entre la magnitud de entrada <em>x</em> y la señal de salida <em>y</em> se describe mediante la <em>función de transferencia</em>:</p>
+
+      <div class="equation">
+        y(t) = S · x(t) + y₀ + ε(t)
+        <span class="equation-label">Ec. 1.1 — Modelo lineal de un sensor, donde S es la sensibilidad, y₀ el offset y ε el ruido</span>
+      </div>
+
+      <p>Donde:</p>
+      <ul>
+        <li><strong>S</strong> (sensibilidad): pendiente de la curva de calibración [V/Pa, mV/°C, etc.]</li>
+        <li><strong>y₀</strong> (offset): señal de salida cuando x = 0</li>
+        <li><strong>ε(t)</strong> (ruido): componente estocástica, típicamente modelada como gaussiana 𝒩(0, σ²)</li>
+      </ul>
+
+      <h4>1.1.1 Especificaciones críticas de un sensor</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Parámetro</th><th>Definición</th><th>Típico</th></tr></thead>
+          <tbody>
+            <tr><td>Rango dinámico</td><td>Cociente entre máxima y mínima señal detectable</td><td>60–120 dB</td></tr>
+            <tr><td>Resolución</td><td>Mínimo incremento detectable</td><td>12–24 bits ADC</td></tr>
+            <tr><td>Ancho de banda</td><td>Rango de frecuencias de operación</td><td>0.1 Hz – 10 kHz</td></tr>
+            <tr><td>Tiempo de respuesta</td><td>Tiempo para alcanzar 63.2% del valor final</td><td>μs a s</td></tr>
+            <tr><td>Linealidad</td><td>Desviación máxima respecto a la recta ideal</td><td>±0.1% – ±1%</td></tr>
+            <tr><td>Deriva térmica</td><td>Variación de la salida con la temperatura</td><td>ppm/°C</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>1.2 El Sensor como Neurona Periférica</h3>
+      <p>En el paradigma de la IA física, un sensor es análogo a una <strong>neurona sensorial</strong>. Considere un acelerómetro MEMS de 6 ejes (MPU-6050):</p>
+      <ul>
+        <li>Frecuencia de muestreo: 100 Hz (teorema de Nyquist-Shannon)</li>
+        <li>6 valores por muestra: aₓ, aᵧ, a_z, ωₓ, ωᵧ, ω_z</li>
+        <li>Flujo de datos: 600 valores/segundo = <em>potencial de acción</em></li>
+      </ul>
+
+      <div class="equation">
+        <strong>x</strong>(t) = [aₓ, aᵧ, a_z, ωₓ, ωᵧ, ω_z]ᵀ ∈ ℝ⁶
+        <span class="equation-label">Ec. 1.2 — Vector de estado de un IMU de 6 grados de libertad</span>
+      </div>
+
+      <h4>1.2.1 Extracción de características (Feature Engineering)</h4>
+      <p>Las redes neuronales consumen <em>features</em>, no datos crudos. Para una ventana temporal de N muestras, extraemos:</p>
+
+<pre><span class="lang-tag">C++17</span><code><span class="cmt">// Extracción de características estadísticas en C++ moderno</span>
+<span class="pp">#include</span> <span class="str">&lt;array&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;cmath&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;numeric&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;algorithm&gt;</span>
+
+<span class="kw">template</span>&lt;<span class="kw">typename</span> <span class="type">T</span>, <span class="type">size_t</span> N&gt;
+<span class="kw">struct</span> <span class="type">FeatureVector</span> {
+    <span class="type">T</span> mean, std_dev, rms, peak, peak_to_peak;
+    <span class="type">T</span> skewness, kurtosis, zero_crossings;
+    <span class="type">T</span> energy, entropy;
+
+    <span class="kw">static</span> <span class="type">FeatureVector</span> <span class="fn">compute</span>(<span class="kw">const</span> <span class="type">std::array</span>&lt;<span class="type">T</span>, N&gt;&amp; window) {
+        <span class="type">FeatureVector</span> fv;
+
+        <span class="cmt">// Media</span>
+        fv.mean = <span class="fn">std::accumulate</span>(window.<span class="fn">begin</span>(), window.<span class="fn">end</span>(), <span class="type">T</span>(<span class="num">0</span>)) / N;
+
+        <span class="cmt">// Desviación estándar</span>
+        <span class="type">T</span> sq_sum = <span class="fn">std::accumulate</span>(window.<span class="fn">begin</span>(), window.<span class="fn">end</span>(), <span class="type">T</span>(<span class="num">0</span>),
+            [&amp;](<span class="type">T</span> acc, <span class="type">T</span> v) { <span class="kw">return</span> acc + (v - fv.mean) * (v - fv.mean); });
+        fv.std_dev = <span class="fn">std::sqrt</span>(sq_sum / N);
+
+        <span class="cmt">// RMS (Root Mean Square)</span>
+        <span class="type">T</span> sq_sum_raw = <span class="fn">std::accumulate</span>(window.<span class="fn">begin</span>(), window.<span class="fn">end</span>(), <span class="type">T</span>(<span class="num">0</span>),
+            [](<span class="type">T</span> acc, <span class="type">T</span> v) { <span class="kw">return</span> acc + v * v; });
+        fv.rms = <span class="fn">std::sqrt</span>(sq_sum_raw / N);
+
+        <span class="cmt">// Peak y Peak-to-Peak</span>
+        <span class="kw">auto</span> [min_it, max_it] = <span class="fn">std::minmax_element</span>(window.<span class="fn">begin</span>(), window.<span class="fn">end</span>());
+        fv.peak = *max_it;
+        fv.peak_to_peak = *max_it - *min_it;
+
+        <span class="cmt">// Skewness (asimetría)</span>
+        <span class="type">T</span> m3 = <span class="fn">std::accumulate</span>(window.<span class="fn">begin</span>(), window.<span class="fn">end</span>(), <span class="type">T</span>(<span class="num">0</span>),
+            [&amp;](<span class="type">T</span> acc, <span class="type">T</span> v) { <span class="kw">return</span> acc + <span class="fn">std::pow</span>(v - fv.mean, <span class="num">3</span>); }) / N;
+        fv.skewness = m3 / <span class="fn">std::pow</span>(fv.std_dev, <span class="num">3</span>);
+
+        <span class="cmt">// Kurtosis (aplastamiento)</span>
+        <span class="type">T</span> m4 = <span class="fn">std::accumulate</span>(window.<span class="fn">begin</span>(), window.<span class="fn">end</span>(), <span class="type">T</span>(<span class="num">0</span>),
+            [&amp;](<span class="type">T</span> acc, <span class="type">T</span> v) { <span class="kw">return</span> acc + <span class="fn">std::pow</span>(v - fv.mean, <span class="num">4</span>); }) / N;
+        fv.kurtosis = m4 / <span class="fn">std::pow</span>(fv.std_dev, <span class="num">4</span>) - <span class="num">3.0</span>;
+
+        <span class="cmt">// Zero crossings</span>
+        fv.zero_crossings = <span class="num">0</span>;
+        <span class="kw">for</span> (<span class="type">size_t</span> i = <span class="num">1</span>; i &lt; N; ++i)
+            <span class="kw">if</span> ((window[i] &gt;= <span class="num">0</span>) != (window[i-<span class="num">1</span>] &gt;= <span class="num">0</span>)) fv.zero_crossings++;
+
+        <span class="cmt">// Energía de la señal</span>
+        fv.energy = sq_sum_raw;
+
+        <span class="kw">return</span> fv;
+    }
+};</code></pre>
+
+      <div class="callout math">
+        <div class="callout-title">📐 Fundamento Matemático</div>
+        <p><strong>Skewness:</strong> γ₁ = μ₃ / σ³ mide la asimetría de la distribución.</p>
+        <p><strong>Kurtosis:</strong> κ = μ₄ / σ⁴ − 3 mide el "peso" de las colas. Una kurtosis alta indica presencia de picos (útil para detectar fallos en rodamientos).</p>
+      </div>
+
+      <h3>1.3 Tipología de Sensores y su Modalidad en IA</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Sensor</th><th>Modalidad</th><th>Arquitectura IA</th><th>Aplicación</th></tr></thead>
+          <tbody>
+            <tr><td>Cámara RGB</td><td>Tensor 3D (H×W×3)</td><td>CNN, Vision Transformer</td><td>Visión por computador</td></tr>
+            <tr><td>Lidar / ToF</td><td>Nube de puntos 3D</td><td>PointNet, VoxelNet</td><td>SLAM, navegación</td></tr>
+            <tr><td>Micrófono</td><td>Serie temporal / Espectrograma</td><td>Wav2Vec, CNN 1D</td><td>Reconocimiento de voz</td></tr>
+            <tr><td>IMU (acel+giro)</td><td>Serie temporal 6D</td><td>LSTM, Transformer 1D</td><td>Detección de actividad</td></tr>
+            <tr><td>Termopar (tipo K)</td><td>Escalar continuo</td><td>Regresión, Filtro Kalman</td><td>Control térmico</td></tr>
+            <tr><td>Sensor de gas (MQ-x)</td><td>Resistencia (Ω)</td><td>Random Forest, SVM</td><td>Quimiometría</td></tr>
+            <tr><td>Strain gauge</td><td>Deformación (με)</td><td>Redes residuales</td><td>Monitoreo estructural</td></tr>
+            <tr><td>Encoder rotatorio</td><td>Pulsos / Ángulo</td><td>Filtro de partículas</td><td>Odometría</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>1.4 Condicionamiento de Señal</h3>
+      <p>Antes de la digitalización (ADC), la señal analógica requiere <strong>acondicionamiento</strong>:</p>
+
+      <div class="equation">
+        V_out = G · (V_sensor − V_ref) + V_offset
+        <span class="equation-label">Ec. 1.3 — Etapa de acondicionamiento con amplificador de instrumentación</span>
+      </div>
+
+      <p>Las etapas típicas son:</p>
+      <ol>
+        <li><strong>Amplificación:</strong> ganancia G adaptada al rango del ADC (típicamente 3.3 V o 5 V)</li>
+        <li><strong>Filtrado paso-bajo:</strong> eliminación de ruido de alta frecuencia (filtro RC o activo Butterworth)</li>
+        <li><strong>Offset:</strong> desplazamiento del nivel DC para centrar la señal</li>
+        <li><strong>Protección:</strong> diodos de clamp para evitar saturación del ADC</li>
+      </ol>
+
+      <h4>1.4.1 Filtro anti-aliasing (Nyquist-Shannon)</h4>
+      <p>El <strong>Teorema de Muestreo de Nyquist-Shannon</strong> establece que la frecuencia de muestreo fₛ debe cumplir:</p>
+
+      <div class="equation">
+        fₛ ≥ 2 · f_max
+        <span class="equation-label">Ec. 1.4 — Criterio de Nyquist para evitar aliasing</span>
+      </div>
+
+      <p>En la práctica, se usa un factor de seguridad de 2.5× a 4× y un filtro pasa-bajos de orden n con frecuencia de corte f_c = fₛ / 2.5.</p>
+
+<pre><span class="lang-tag">C++17</span><code><span class="cmt">// Filtro digital IIR Butterworth de 2º orden (biquad)</span>
+<span class="cmt">// Coeficientes calculados con scipy.signal.butter(2, fc/fs)</span>
+<span class="kw">class</span> <span class="type">ButterworthLPF</span> {
+    <span class="type">double</span> b0, b1, b2, a1, a2;
+    <span class="type">double</span> x1 = <span class="num">0</span>, x2 = <span class="num">0</span>, y1 = <span class="num">0</span>, y2 = <span class="num">0</span>;
+
+<span class="kw">public</span>:
+    <span class="type">ButterworthLPF</span>(<span class="type">double</span> fc, <span class="type">double</span> fs) {
+        <span class="type">double</span> omega = <span class="num">2.0</span> * M_PI * fc / fs;
+        <span class="type">double</span> c = <span class="num">1.0</span> / <span class="fn">std::tan</span>(omega / <span class="num">2.0</span>);
+        <span class="type">double</span> denom = c*c + <span class="fn">std::sqrt</span>(<span class="num">2.0</span>)*c + <span class="num">1.0</span>;
+        b0 = <span class="num">1.0</span> / denom;
+        b1 = <span class="num">2.0</span> * b0;
+        b2 = b0;
+        a1 = <span class="num">2.0</span> * (c*c - <span class="num">1.0</span>) / denom;
+        a2 = (c*c - <span class="fn">std::sqrt</span>(<span class="num">2.0</span>)*c + <span class="num">1.0</span>) / denom;
+    }
+
+    <span class="type">double</span> <span class="fn">filter</span>(<span class="type">double</span> x0) {
+        <span class="type">double</span> y0 = b0*x0 + b1*x1 + b2*x2 - a1*y1 - a2*y2;
+        x2 = x1; x1 = x0;
+        y2 = y1; y1 = y0;
+        <span class="kw">return</span> y0;
+    }
+};</code></pre>
+
+      <h3>1.5 Análisis Estadístico de Datos de Sensores</h3>
+      <p>Los datos de sensores son inherentemente <strong>estocásticos</strong>. El análisis estadístico riguroso es esencial.</p>
+
+      <h4>1.5.1 Incertidumbre de medición</h4>
+      <p>Según la <em>Guía para la Expresión de la Incertidumbre de Medida (GUM)</em>, la incertidumbre combinada es:</p>
+
+      <div class="equation">
+        u_c = √( ∑ᵢ (∂f/∂xᵢ)² · uᵢ² )
+        <span class="equation-label">Ec. 1.5 — Ley de propagación de la incertidumbre</span>
+      </div>
+
+      <h4>1.5.2 Intervalo de confianza</h4>
+      <p>Para N mediciones con media x̄ y desviación estándar s, el intervalo de confianza al 95% es:</p>
+
+      <div class="equation">
+        IC₉₅% = x̄ ± t₀.₀₂₅,ₙ₋₁ · s / √N
+        <span class="equation-label">Ec. 1.6 — Intervalo de confianza con distribución t de Student</span>
+      </div>
+
+      <div class="callout exercise">
+        <div class="callout-title">🧪 Ejercicio 1.1</div>
+        <p>Conecte un MPU-6050 a un Arduino Nano 33 BLE. Capture 30 segundos de datos mientras realiza tres gestos distintos (agitar, inclinar, girar). Guarde los datos en CSV. Calcule las 10 características estadísticas por eje. Ese es su primer <em>dataset</em> para TinyML.</p>
+      </div>
+
+      <div class="ref-list">
+        <h4>Referencias Académicas del Capítulo 1</h4>
+        <ol>
+          <li>Karvinen, K. &amp; Karvinen, T. (2014). <em>Getting Started with Sensors</em>. Maker Media.</li>
+          <li>Lion, C. C. (2019). <em>Building AI Applications with TinyML</em>. O'Reilly.</li>
+          <li>Oppenheim, A. V. &amp; Schafer, R. W. (2014). <em>Discrete-Time Signal Processing</em>. Pearson.</li>
+          <li>BIPM (2008). <em>Evaluation of measurement data — Guide to the expression of uncertainty in measurement (GUM)</em>. JCGM 100.</li>
+          <li>Stroustrup, B. (2013). <em>The C++ Programming Language</em>, 4th Ed. Addison-Wesley. Cap. 5 y 40.</li>
+        </ol>
+      </div>
+    </article>
+
+    <!-- ============ CAPÍTULO 2 ============ -->
+    <article class="chapter fade-in" id="cap2">
+      <div class="chapter-header">
+        <div class="num">Capítulo 02 · Parte I</div>
+        <h2>IoT y Edge Computing</h2>
+      </div>
+
+      <p class="chapter-lead">
+        Procesar en el borde no es una opción: es una necesidad física. La latencia, la privacidad, el ancho de banda y la autonomía energética lo exigen. Este capítulo analiza la arquitectura computacional distribuida de los sistemas ciberfísicos.
+      </p>
+
+      <h3>2.1 La Pirámide del Procesamiento Ciberfísico</h3>
+      <p>Los sistemas modernos siguen una arquitectura jerárquica de cuatro niveles:</p>
+
+      <div class="diagram">
+        <svg viewBox="0 0 540 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pirámide del procesamiento ciberfísico">
+          <defs>
+            <linearGradient id="g1" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#06b6d4"/>
+              <stop offset="100%" style="stop-color:#8b5cf6"/>
+            </linearGradient>
+          </defs>
+          <polygon points="270,20 490,350 50,350" fill="url(#g1)" opacity="0.12" stroke="#06b6d4" stroke-width="1.5"/>
+          <text x="270" y="60" text-anchor="middle" fill="var(--text)" font-size="14" font-weight="bold">🧠 Cloud (AWS/GCP/Azure)</text>
+          <text x="270" y="82" text-anchor="middle" fill="var(--text-dim)" font-size="11">Entrenamiento · Big Data · Modelos globales</text>
+          <text x="270" y="170" text-anchor="middle" fill="var(--text)" font-size="14" font-weight="bold">🖥️ Gateway (RPi / Jetson)</text>
+          <text x="270" y="192" text-anchor="middle" fill="var(--text-dim)" font-size="11">Agregación · Inferencia media · Fusión</text>
+          <text x="270" y="280" text-anchor="middle" fill="var(--text)" font-size="14" font-weight="bold">📟 Edge (MCU / Arduino)</text>
+          <text x="270" y="302" text-anchor="middle" fill="var(--text-dim)" font-size="11">TinyML · Control · Tiempo real</text>
+        </svg>
+        <div class="diagram-caption">Figura 2.1 — Pirámide del procesamiento ciberfísico</div>
+      </div>
+
+      <h3>2.2 Análisis Comparativo: MCU vs SBC vs GPU</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Plataforma</th><th>Ejemplo</th><th>RAM</th><th>Consumo</th><th>Latencia</th><th>Modelo IA</th></tr></thead>
+          <tbody>
+            <tr><td>MCU</td><td>Arduino Nano 33 BLE</td><td>256 KB</td><td>~20 mA</td><td>μs (determinista)</td><td>TinyML &lt;256 KB</td></tr>
+            <tr><td>SBC</td><td>Raspberry Pi 4</td><td>8 GB</td><td>~600 mA</td><td>ms (no determinista)</td><td>TF Lite MB–GB</td></tr>
+            <tr><td>Edge GPU</td><td>Jetson Nano</td><td>4 GB</td><td>~5 W</td><td>~10 ms</td><td>YOLO, ResNet</td></tr>
+            <tr><td>Cloud GPU</td><td>NVIDIA A100</td><td>80 GB</td><td>~400 W</td><td>~100 ms RTT</td><td>GPT-4, DALL-E</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>2.3 Ley de Amdahl Aplicada al Edge</h3>
+      <p>La <strong>Ley de Amdahl</strong> establece el speedup máximo al paralelizar una tarea:</p>
+
+      <div class="equation">
+        S(N) = 1 / ((1 − P) + P/N)
+        <span class="equation-label">Ec. 2.1 — Ley de Amdahl, donde P es la fracción paralelizable y N el número de núcleos</span>
+      </div>
+
+      <p>En Edge Computing, la fracción no paralelizable (1−P) incluye:</p>
+      <ul>
+        <li>Lectura de sensores (E/S serial: I²C, SPI, UART)</li>
+        <li>Preprocesamiento de señal (filtrado, FFT)</li>
+        <li>Comunicación con actuadores (PWM, GPIO)</li>
+      </ul>
+
+      <h3>2.4 Consumo Energético y Autonomía</h3>
+      <p>La energía total consumida por un nodo Edge durante su vida útil T es:</p>
+
+      <div class="equation">
+        E_total = ∫₀ᵀ P(t) dt = ∑ᵢ Pᵢ · tᵢ
+        <span class="equation-label">Ec. 2.2 — Energía total como suma de modos de operación</span>
+      </div>
+
+      <p>Los modos típicos de un MCU son:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Modo</th><th>Consumo</th><th>Duración</th><th>Energía/ciclo</th></tr></thead>
+          <tbody>
+            <tr><td>Activo (inferencia)</td><td>15 mA</td><td>5 ms</td><td>75 μJ</td></tr>
+            <tr><td>Sleep ligero</td><td>10 μA</td><td>995 ms</td><td>10 μJ</td></tr>
+            <tr><td>Deep sleep</td><td>2 μA</td><td>entre eventos</td><td>~0</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Con una batería CR2032 de 225 mAh a 3 V (675 mJ), un nodo bien diseñado puede operar <strong>más de 2 años</strong> con una inferencia por minuto.</p>
+
+<pre><span class="lang-tag">C++17</span><code><span class="cmt">// Nodo Edge optimizado energéticamente</span>
+<span class="pp">#include</span> <span class="str">&lt;Arduino.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;ArduinoLowPower.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;TensorFlowLite.h&gt;</span>
+
+<span class="kw">constexpr</span> <span class="type">uint32_t</span> INFERENCE_INTERVAL_MS = <span class="num">60000</span>;  <span class="cmt">// 1 minuto</span>
+
+<span class="type">void</span> <span class="fn">setup</span>() {
+    <span class="fn">pinMode</span>(LED_BUILTIN, OUTPUT);
+    <span class="fn">init_imu</span>();
+    <span class="fn">load_tflite_model</span>();
+}
+
+<span class="type">void</span> <span class="fn">loop</span>() {
+    <span class="fn">wake_imu</span>();
+    <span class="fn">delay</span>(<span class="num">10</span>);
+
+    <span class="kw">auto</span> features = <span class="fn">capture_and_extract</span>();
+    <span class="kw">auto</span> prediction = model.<span class="fn">predict</span>(features);
+
+    <span class="kw">if</span> (prediction.confidence &gt; <span class="num">0.85f</span>) {
+        <span class="fn">transmit_event</span>(prediction);
+    }
+
+    <span class="fn">sleep_imu</span>();
+    LowPower.<span class="fn">deepSleep</span>(INFERENCE_INTERVAL_MS);
+}</code></pre>
+
+      <h3>2.5 Protocolos de Comunicación IoT</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Protocolo</th><th>Capa</th><th>Alcance</th><th>Velocidad</th><th>Consumo</th><th>Caso de uso</th></tr></thead>
+          <tbody>
+            <tr><td>I²C</td><td>Board</td><td>~1 m</td><td>100k–3.4 Mbps</td><td>Bajo</td><td>Sensores on-board</td></tr>
+            <tr><td>SPI</td><td>Board</td><td>~1 m</td><td>10–80 Mbps</td><td>Bajo</td><td>Displays, SD cards</td></tr>
+            <tr><td>UART</td><td>Board</td><td>~15 m</td><td>115200 bps</td><td>Bajo</td><td>GPS, módulos</td></tr>
+            <tr><td>BLE 5.0</td><td>PAN</td><td>~100 m</td><td>2 Mbps</td><td>Muy bajo</td><td>Wearables</td></tr>
+            <tr><td>LoRa</td><td>WAN</td><td>~15 km</td><td>0.3–50 kbps</td><td>Muy bajo</td><td>Agricultura, ciudades</td></tr>
+            <tr><td>WiFi 6</td><td>LAN</td><td>~100 m</td><td>9.6 Gbps</td><td>Alto</td><td>Streaming, visión</td></tr>
+            <tr><td>MQTT</td><td>App</td><td>Global</td><td>Variable</td><td>Bajo</td><td>Telemetría</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-title">⚠️ Regla de Oro del Edge</div>
+        <p><strong>Nunca envíes datos crudos a la nube sin procesar.</strong> El ancho de banda se dispara, la latencia crece y expones información privada. Filtra en el borde, sube solo eventos o features. Un nodo que envía 1 MB/s consume ~10 W; uno que envía eventos consume ~10 mW.</p>
+      </div>
+
+      <div class="ref-list">
+        <h4>Referencias Académicas del Capítulo 2</h4>
+        <ol>
+          <li>Shi, W. et al. (2016). <em>Edge Computing: Vision and Challenges</em>. IEEE Internet of Things Journal.</li>
+          <li>Amdahl, G. M. (1967). <em>Validity of the Single Processor Approach to Achieving Large Scale Computing Capabilities</em>. AFIPS.</li>
+          <li>Karvinen, K. &amp; Karvinen, T. (2014). Cap. 8–10: Raspberry Pi y procesamiento distribuido.</li>
+          <li>Stroustrup, B. (2013). Cap. 5: Tipos, variables y aritmética; Cap. 13: Concurrencia.</li>
+        </ol>
+      </div>
+    </article>
+
+    <!-- ============ CAPÍTULO 3 ============ -->
+    <article class="chapter fade-in" id="cap3">
+      <div class="chapter-header">
+        <div class="num">Capítulo 03 · Parte I</div>
+        <h2>Fusión de Sensores</h2>
+      </div>
+
+      <p class="chapter-lead">
+        Ningún sensor es perfecto. La fusión sensorial combina múltiples fuentes imperfectas para producir una estimación más precisa que la de cualquier sensor individual. Este capítulo presenta los fundamentos matemáticos del Filtro de Kalman y las arquitecturas modernas de fusión neuronal.
+      </p>
+
+      <h3>3.1 Los Tres Niveles de Fusión</h3>
+      <ol>
+        <li><strong>Bajo nivel (datos):</strong> combinar lecturas crudas. Ej: múltiples termopares → campo térmico.</li>
+        <li><strong>Medio nivel (features):</strong> combinar características. Ej: GPS + odometría visual → posición.</li>
+        <li><strong>Alto nivel (decisión):</strong> combinar clasificaciones. Ej: voto ponderado entre CNN y detector lidar.</li>
+      </ol>
+
+      <h3>3.2 El Filtro de Kalman: Fundamentos Matemáticos</h3>
+      <p>El Filtro de Kalman es el algoritmo óptimo (en sentido de mínimo error cuadrático medio) para estimar el estado de un sistema lineal con ruido gaussiano.</p>
+
+      <h4>3.2.1 Modelo del sistema</h4>
+      <div class="equation">
+        <strong>x</strong>ₖ = <strong>F</strong> <strong>x</strong>ₖ₋₁ + <strong>B</strong> <strong>u</strong>ₖ + <strong>w</strong>ₖ,   <strong>w</strong>ₖ ~ 𝒩(0, <strong>Q</strong>)
+        <span class="equation-label">Ec. 3.1 — Ecuación de estado</span>
+      </div>
+      <div class="equation">
+        <strong>z</strong>ₖ = <strong>H</strong> <strong>x</strong>ₖ + <strong>v</strong>ₖ,   <strong>v</strong>ₖ ~ 𝒩(0, <strong>R</strong>)
+        <span class="equation-label">Ec. 3.2 — Ecuación de medida</span>
+      </div>
+
+      <h4>3.2.2 Algoritmo en dos fases</h4>
+      <p><strong>Fase de Predicción (Predict):</strong></p>
+      <div class="equation">
+        <strong>x̂</strong>ₖ|ₖ₋₁ = <strong>F</strong> <strong>x̂</strong>ₖ₋₁|ₖ₋₁ + <strong>B</strong> <strong>u</strong>ₖ
+        <span class="equation-label">Ec. 3.3 — Predicción del estado</span>
+      </div>
+      <div class="equation">
+        <strong>P</strong>ₖ|ₖ₋₁ = <strong>F</strong> <strong>P</strong>ₖ₋₁|ₖ₋₁ <strong>F</strong>ᵀ + <strong>Q</strong>
+        <span class="equation-label">Ec. 3.4 — Predicción de la covarianza</span>
+      </div>
+
+      <p><strong>Fase de Actualización (Update):</strong></p>
+      <div class="equation">
+        <strong>ỹ</strong>ₖ = <strong>z</strong>ₖ − <strong>H</strong> <strong>x̂</strong>ₖ|ₖ₋₁
+        <span class="equation-label">Ec. 3.5 — Innovación (residuo)</span>
+      </div>
+      <div class="equation">
+        <strong>S</strong>ₖ = <strong>H</strong> <strong>P</strong>ₖ|ₖ₋₁ <strong>H</strong>ᵀ + <strong>R</strong>
+        <span class="equation-label">Ec. 3.6 — Covarianza de la innovación</span>
+      </div>
+      <div class="equation">
+        <strong>K</strong>ₖ = <strong>P</strong>ₖ|ₖ₋₁ <strong>H</strong>ᵀ <strong>S</strong>ₖ⁻¹
+        <span class="equation-label">Ec. 3.7 — Ganancia de Kalman</span>
+      </div>
+      <div class="equation">
+        <strong>x̂</strong>ₖ|ₖ = <strong>x̂</strong>ₖ|ₖ₋₁ + <strong>K</strong>ₖ <strong>ỹ</strong>ₖ
+        <span class="equation-label">Ec. 3.8 — Actualización del estado</span>
+      </div>
+      <div class="equation">
+        <strong>P</strong>ₖ|ₖ = (<strong>I</strong> − <strong>K</strong>ₖ <strong>H</strong>) <strong>P</strong>ₖ|ₖ₋₁
+        <span class="equation-label">Ec. 3.9 — Actualización de la covarianza</span>
+      </div>
+
+<pre><span class="lang-tag">C++17</span><code><span class="cmt">// Filtro de Kalman para fusión IMU (acelerómetro + giroscopio)</span>
+<span class="pp">#include</span> <span class="str">&lt;array&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;cmath&gt;</span>
+
+<span class="kw">class</span> <span class="type">KalmanPitch</span> {
+    <span class="type">double</span> Q_angle  = <span class="num">0.001</span>;
+    <span class="type">double</span> Q_bias   = <span class="num">0.003</span>;
+    <span class="type">double</span> R_measure = <span class="num">0.03</span>;
+
+    <span class="type">double</span> angle = <span class="num">0</span>, bias = <span class="num">0</span>;
+    <span class="type">double</span> P[<span class="num">2</span>][<span class="num">2</span>] = {{<span class="num">0</span>,<span class="num">0</span>},{<span class="num">0</span>,<span class="num">0</span>}};
+
+<span class="kw">public</span>:
+    <span class="type">double</span> <span class="fn">update</span>(<span class="type">double</span> newAngle, <span class="type">double</span> newRate, <span class="type">double</span> dt) {
+        <span class="type">double</span> rate = newRate - bias;
+        angle += dt * rate;
+
+        P[<span class="num">0</span>][<span class="num">0</span>] += dt * (dt*P[<span class="num">1</span>][<span class="num">1</span>] - P[<span class="num">0</span>][<span class="num">1</span>] - P[<span class="num">1</span>][<span class="num">0</span>] + Q_angle);
+        P[<span class="num">0</span>][<span class="num">1</span>] -= dt * P[<span class="num">1</span>][<span class="num">1</span>];
+        P[<span class="num">1</span>][<span class="num">0</span>] -= dt * P[<span class="num">1</span>][<span class="num">1</span>];
+        P[<span class="num">1</span>][<span class="num">1</span>] += Q_bias * dt;
+
+        <span class="type">double</span> S = P[<span class="num">0</span>][<span class="num">0</span>] + R_measure;
+        <span class="type">double</span> K0 = P[<span class="num">0</span>][<span class="num">0</span>] / S;
+        <span class="type">double</span> K1 = P[<span class="num">1</span>][<span class="num">0</span>] / S;
+
+        <span class="type">double</span> y = newAngle - angle;
+        angle += K0 * y;
+        bias  += K1 * y;
+
+        <span class="type">double</span> P00_temp = P[<span class="num">0</span>][<span class="num">0</span>];
+        <span class="type">double</span> P01_temp = P[<span class="num">0</span>][<span class="num">1</span>];
+
+        P[<span class="num">0</span>][<span class="num">0</span>] -= K0 * P00_temp;
+        P[<span class="num">0</span>][<span class="num">1</span>] -= K0 * P01_temp;
+        P[<span class="num">1</span>][<span class="num">0</span>] -= K1 * P00_temp;
+        P[<span class="num">1</span>][<span class="num">1</span>] -= K1 * P01_temp;
+
+        <span class="kw">return</span> angle;
+    }
+
+    <span class="type">double</span> <span class="fn">getAngle</span>() <span class="kw">const</span> { <span class="kw">return</span> angle; }
+    <span class="type">double</span> <span class="fn">getBias</span>()  <span class="kw">const</span> { <span class="kw">return</span> bias; }
+};</code></pre>
+
+      <h3>3.3 Fusión Moderna con Atención Multimodal</h3>
+      <p>Los enfoques contemporáneos usan <strong>arquitecturas Transformer</strong> que aprenden a ponderar cada sensor dinámicamente:</p>
+
+      <div class="equation">
+        Attention(Q, K, V) = softmax(QKᵀ / √dₖ) · V
+        <span class="equation-label">Ec. 3.10 — Mecanismo de atención (Vaswani et al., 2017)</span>
+      </div>
+
+      <p>Donde Q, K, V son proyecciones lineales de las features de cada sensor. La red aprende que, de noche, debe confiar más en el lidar; de día con sol, en la cámara.</p>
+
+      <div class="callout concept">
+        <div class="callout-title">💡 Concepto Clave</div>
+        <p><strong>Atención sensorial adaptativa:</strong> similar a cómo el cerebro humano pondera la visión sobre el oído en un entorno iluminado, pero el oído sobre la visión en la oscuridad, una red neuronal multimodal aprende a asignar pesos dinámicos a cada modalidad según su confiabilidad instantánea.</p>
+      </div>
+
+      <div class="ref-list">
+        <h4>Referencias Académicas del Capítulo 3</h4>
+        <ol>
+          <li>Kalman, R. E. (1960). <em>A New Approach to Linear Filtering and Prediction Problems</em>. Trans. ASME.</li>
+          <li>Vaswani, A. et al. (2017). <em>Attention Is All You Need</em>. NeurIPS.</li>
+          <li>Simon, D. (2006). <em>Optimal State Estimation: Kalman, H∞, and Nonlinear Approaches</em>. Wiley.</li>
+          <li>Feng, D. et al. (2019). <em>Deep Multi-modal Object Detection and Semantic Segmentation for Autonomous Driving</em>.</li>
+        </ol>
+      </div>
+    </article>
+
+    <!-- ============ CAPÍTULO 4 ============ -->
+    <article class="chapter fade-in" id="cap4">
+      <div class="chapter-header">
+        <div class="num">Capítulo 04 · Parte II</div>
+        <h2>Descubrimiento Acelerado de Materiales</h2>
+      </div>
+
+      <p class="chapter-lead">
+        La IA ya no solo analiza materiales: los <em>diseña</em>. AlphaFold revolucionó la biología estructural; GNoME de Google DeepMind ha predicho 2,2 millones de nuevos cristales estables. Este capítulo presenta los fundamentos de la ciencia de materiales y cómo el Machine Learning acelera su descubrimiento.
+      </p>
+
+      <h3>4.1 Fundamentos de Ciencia de Materiales</h3>
+      <p>Siguiendo a James Newell, las propiedades de un material están determinadas por su <strong>estructura</strong>, que a su vez depende de su <strong>procesamiento</strong>:</p>
+
+      <div class="equation">
+        Propiedades = f(Estructura) = f(g(Procesamiento))
+        <span class="equation-label">Ec. 4.1 — Tetraedro de la ciencia de materiales</span>
+      </div>
+
+      <h4>4.1.1 Estructura cristalina</h4>
+      <p>Los metales se organizan en redes cristalinas. Las más comunes son:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Estructura</th><th>Símbolo</th><th>Átomos/celda</th><th>Factor empaquetamiento</th><th>Ejemplos</th></tr></thead>
+          <tbody>
+            <tr><td>Cúbica centrada en caras</td><td>FCC</td><td>4</td><td>0.74</td><td>Al, Cu, Au, Ni</td></tr>
+            <tr><td>Cúbica centrada en cuerpo</td><td>BCC</td><td>2</td><td>0.68</td><td>Fe-α, W, Cr</td></tr>
+            <tr><td>Hexagonal compacta</td><td>HCP</td><td>6</td><td>0.74</td><td>Ti, Mg, Zn</td></tr>
+            <tr><td>Cúbica simple</td><td>SC</td><td>1</td><td>0.52</td><td>Po</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>4.1.2 Defectos cristalinos</h4>
+      <p>Los defectos controlan las propiedades mecánicas. Según Newell:</p>
+      <ul>
+        <li><strong>Defectos puntuales:</strong> vacantes, intersticiales, sustitucionales</li>
+        <li><strong>Defectos de línea:</strong> dislocaciones (borde, tornillo, mixtas)</li>
+        <li><strong>Defectos de superficie:</strong> fronteras de grano, superficies libres</li>
+        <li><strong>Defectos de volumen:</strong> poros, inclusiones, grietas</li>
+      </ul>
+
+      <h3>4.2 Propiedades Mecánicas Fundamentales</h3>
+      <h4>4.2.1 Ley de Hooke generalizada</h4>
+      <div class="equation">
+        σᵢⱼ = Cᵢⱼₖₗ · εₖₗ
+        <span class="equation-label">Ec. 4.2 — Ley de Hooke tensorial, C es el tensor de rigidez de 4º orden</span>
+      </div>
+
+      <p>Para materiales isótropos, se reduce a dos constantes independientes (módulo de Young E y coeficiente de Poisson ν):</p>
+      <div class="equation">
+        E = σ/ε,   ν = −ε_trans / ε_axial
+        <span class="equation-label">Ec. 4.3 — Módulo de Young y coeficiente de Poisson</span>
+      </div>
+
+      <h4>4.2.2 Criterio de Von Mises (energía de distorsión)</h4>
+      <div class="equation">
+        σ_v = √( ½[(σ₁−σ₂)² + (σ₂−σ₃)² + (σ₃−σ₁)²] )
+        <span class="equation-label">Ec. 4.4 — Esfuerzo equivalente de Von Mises</span>
+      </div>
+
+      <p>El material cede cuando σ_v ≥ σ_y (límite elástico).</p>
+
+      <h4>4.2.3 Tabla de propiedades mecánicas típicas</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Material</th><th>E (GPa)</th><th>σ_y (MPa)</th><th>ρ (g/cm³)</th><th>K_IC (MPa·m^0.5)</th></tr></thead>
+          <tbody>
+            <tr><td>Acero AISI 1045</td><td>205</td><td>530</td><td>7.85</td><td>50</td></tr>
+            <tr><td>Aluminio 6061-T6</td><td>69</td><td>275</td><td>2.70</td><td>26</td></tr>
+            <tr><td>Titanio Ti-6Al-4V</td><td>114</td><td>880</td><td>4.43</td><td>75</td></tr>
+            <tr><td>CFRP (fibra carbono)</td><td>150</td><td>1500</td><td>1.60</td><td>40</td></tr>
+            <tr><td>PLA (impresión 3D)</td><td>3.5</td><td>60</td><td>1.24</td><td>2</td></tr>
+            <tr><td>PETG</td><td>2.0</td><td>45</td><td>1.27</td><td>1.5</td></tr>
+            <tr><td>Vidrio borosilicato</td><td>64</td><td>—</td><td>2.23</td><td>0.75</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>4.3 Machine Learning para Descubrimiento de Materiales</h3>
+      <h4>4.3.1 Representación de materiales</h4>
+      <p>Las <strong>Graph Neural Networks (GNN)</strong> representan la estructura cristalina como un grafo:</p>
+      <ul>
+        <li><strong>Nodos:</strong> átomos, con features atómicas (número atómico, radio, electronegatividad)</li>
+        <li><strong>Aristas:</strong> enlaces, con features de distancia y ángulo</li>
+      </ul>
+
+      <div class="equation">
+        <strong>h</strong>ᵢ⁽ˡ⁺¹⁾ = σ( ∑ⱼ∈𝒩(ᵢ) W⁽ˡ⁾ <strong>h</strong>ⱼ⁽ˡ⁾ + B⁽ˡ⁾ <strong>h</strong>ᵢ⁽ˡ⁾ )
+        <span class="equation-label">Ec. 4.5 — Actualización de nodos en una GNN</span>
+      </div>
+
+      <h4>4.3.2 Optimización Bayesiana</h4>
+      <p>Para explorar el espacio químico eficientemente, se usa <strong>Optimización Bayesiana</strong>:</p>
+
+      <div class="equation">
+        α(<strong>x</strong>) = 𝔼[ f(<strong>x</strong>*) − f(<strong>x</strong>) | 𝒟 ]
+        <span class="equation-label">Ec. 4.6 — Función de adquisición Expected Improvement</span>
+      </div>
+
+      <h3>4.4 Caso de Estudio: Aleaciones Ligeras Aeroespaciales</h3>
+      <p>En 2023, investigadores del MIT usaron Optimización Bayesiana sobre un espacio de aleaciones Al-Li-Sc-Zr para encontrar una composición con:</p>
+      <ul>
+        <li>Densidad &lt; 2.7 g/cm³</li>
+        <li>Resistencia a tracción &gt; 600 MPa</li>
+        <li>Resistencia a fatiga mejorada en 40%</li>
+      </ul>
+      <p>El proceso, que hubiera tomado 8 años con métodos tradicionales, se completó en <strong>11 meses</strong>.</p>
+
+      <div class="callout insight">
+        <div class="callout-title">🔮 Insight</div>
+        <p>El ingeniero de materiales del futuro no memoriza diagramas de fase: <strong>diseña funciones de pérdida</strong> que guían a la IA hacia la microestructura deseada. Como señala Newell: "Las propiedades de un material están determinadas por su estructura". La IA aprende a invertir esa relación: dada la propiedad deseada, propone la estructura.</p>
+      </div>
+
+      <div class="ref-list">
+        <h4>Referencias Académicas del Capítulo 4</h4>
+        <ol>
+          <li>Newell, J. (2019). <em>Ciencia de Materiales: Aplicaciones en Ingeniería</em>. Alfaomega. Caps. 2–4.</li>
+          <li>Merchant, A. et al. (2023). <em>Scaling deep learning for materials discovery</em>. Nature.</li>
+          <li>Callister, W. D. &amp; Rethwisch, D. G. (2014). <em>Materials Science and Engineering</em>. Wiley.</li>
+          <li>Xie, T. &amp; Grossman, J. C. (2018). <em>Crystal Graph Convolutional Neural Networks</em>. Phys. Rev. Lett.</li>
+        </ol>
+      </div>
+    </article>
+
+    <!-- ============ CAPÍTULO 5 ============ -->
+    <article class="chapter fade-in" id="cap5">
+      <div class="chapter-header">
+        <div class="num">Capítulo 05 · Parte II</div>
+        <h2>Materiales Inteligentes y Sensores Intrínsecos</h2>
+      </div>
+
+      <p class="chapter-lead">
+        ¿Y si el material <em>fuera</em> el sensor? La frontera actual de la ingeniería convierte la propia estructura en un sistema nervioso distribuido.
+      </p>
+
+      <h3>5.1 Efecto Piezoeléctrico</h3>
+      <p>La piezoelectricidad es la capacidad de ciertos materiales de generar carga eléctrica al ser deformados mecánicamente:</p>
+
+      <div class="equation">
+        Dᵢ = dᵢⱼₖ · σⱼₖ
+        <span class="equation-label">Ec. 5.1 — Efecto piezoeléctrico directo, d es el tensor piezoeléctrico</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Material</th><th>d₃₃ (pC/N)</th><th>k_t</th><th>T_C (°C)</th><th>Aplicación</th></tr></thead>
+          <tbody>
+            <tr><td>PZT-5H</td><td>593</td><td>0.51</td><td>193</td><td>Sensores, actuadores</td></tr>
+            <tr><td>PVDF</td><td>33</td><td>0.20</td><td>110</td><td>Sensores flexibles</td></tr>
+            <tr><td>Cuarzo</td><td>2.3</td><td>0.1</td><td>573</td><td>Osciladores</td></tr>
+            <tr><td>AlN</td><td>5.0</td><td>0.25</td><td>&gt;1000</td><td>MEMS, RF</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>5.2 Nanotubos de Carbono como Sensores</h3>
+      <p>Los CNT tienen una propiedad extraordinaria: su resistencia eléctrica cambia al deformarse. El <strong>factor de galga (gauge factor)</strong> es:</p>
+
+      <div class="equation">
+        GF = (ΔR / R₀) / ε
+        <span class="equation-label">Ec. 5.2 — Factor de galga de un sensor de CNT</span>
+      </div>
+
+      <p>Mientras que las galgas metálicas tienen GF ≈ 2, los CNT pueden alcanzar GF &gt; 1000, siendo <strong>500 veces más sensibles</strong>.</p>
+
+      <h3>5.3 Fibras Ópticas FBG (Fiber Bragg Grating)</h3>
+      <p>Una FBG es una variación periódica del índice de refracción en el núcleo de una fibra óptica. La longitud de onda de Bragg es:</p>
+
+      <div class="equation">
+        λ_B = 2 · n_eff · Λ
+        <span class="equation-label">Ec. 5.3 — Condición de Bragg, Λ es el período de la rejilla</span>
+      </div>
+
+      <p>Cuando la fibra se deforma o cambia su temperatura, λ_B se desplaza:</p>
+
+      <div class="equation">
+        Δλ_B / λ_B = (1 − p_e) · ε + (α + ξ) · ΔT
+        <span class="equation-label">Ec. 5.4 — Sensibilidad a deformación y temperatura</span>
+      </div>
+
+      <p>Donde p_e ≈ 0.22 es el coeficiente fotoelástico efectivo, α el coeficiente de expansión térmica y ξ el coeficiente termo-óptico.</p>
+
+      <h3>5.4 El Ala de Avión que se Siente a Sí Misma</h3>
+      <p>Los composites de fibra de carbono modernos incorporan <strong>redes de CNT</strong> entre capas. Cuando el ala se flexiona en vuelo, la red cambia su resistencia. Una IA interpreta esos cambios para estimar:</p>
+      <ul>
+        <li>La carga estructural en tiempo real</li>
+        <li>El inicio de micro-fisuras (mantenimiento predictivo)</li>
+        <li>La deformación aerodinámica exacta</li>
+      </ul>
+
+      <div class="callout concept">
+        <div class="callout-title">💡 Concepto Clave</div>
+        <p><strong>Materiales neuromórficos:</strong> materiales que imitan el comportamiento de neuronas. Ya existen prototipos de memristores basados en óxidos (TaOx, HfOx) que pueden implementarse directamente en la estructura de un robot, creando un "tejido sensorial" distribuido.</p>
+      </div>
+
+      <div class="ref-list">
+        <h4>Referencias Académicas del Capítulo 5</h4>
+        <ol>
+          <li>Newell, J. (2019). Cap. 8: Propiedades electrónicas y ópticas.</li>
+          <li>Ikeda, T. (1990). <em>Fundamentals of Piezoelectricity</em>. Oxford University Press.</li>
+          <li>Kafka, O. et al. (2020). <em>3D printed piezoelectric sensors</em>. Additive Manufacturing.</li>
+          <li>Liu, H. et al. (2017). <em>Highly sensitive flexible strain sensors</em>. Advanced Functional Materials.</li>
+        </ol>
+      </div>
+    </article>
+
+    <!-- ============ CAPÍTULO 6 ============ -->
+    <article class="chapter fade-in" id="cap6">
+      <div class="chapter-header">
+        <div class="num">Capítulo 06 · Parte II</div>
+        <h2>Ingeniería Verde e IA</h2>
+      </div>
+
+      <p class="chapter-lead">
+        La sostenibilidad ya no es una restricción: es una función objetivo más que la IA puede optimizar junto con el rendimiento. Newell dedica atención especial a economía, medio ambiente, ética y ciclo de vida.
+      </p>
+
+      <h3>6.1 Las Tres Dimensiones de la Sostenibilidad Material</h3>
+      <div class="layer-grid">
+        <div class="layer-card mat">
+          <h5>🌱 Origen</h5>
+          <p>Energía embebida, huella de carbono, toxicidad en extracción, consumo de agua.</p>
+        </div>
+        <div class="layer-card design">
+          <h5>🔄 Vida útil</h5>
+          <p>Durabilidad, mantenimiento, eficiencia en uso, resistencia a fatiga.</p>
+        </div>
+        <div class="layer-card sensor">
+          <h5>♻️ Fin de vida</h5>
+          <p>Reciclabilidad, biodegradabilidad, economía circular, valor residual.</p>
+        </div>
+      </div>
+
+      <h3>6.2 Energía Embebida de Materiales Comunes</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Material</th><th>Energía embebida (MJ/kg)</th><th>CO₂ (kg/kg)</th><th>Reciclable</th></tr></thead>
+          <tbody>
+            <tr><td>Acero</td><td>20–25</td><td>1.8</td><td>Alta</td></tr>
+            <tr><td>Aluminio primario</td><td>155–200</td><td>12</td><td>Alta</td></tr>
+            <tr><td>Aluminio reciclado</td><td>8</td><td>0.6</td><td>Alta</td></tr>
+            <tr><td>PLA</td><td>80</td><td>2.5</td><td>Compostable</td></tr>
+            <tr><td>PETG</td><td>85</td><td>3.2</td><td>Mecánicamente</td></tr>
+            <tr><td>CFRP</td><td>300–400</td><td>25</td><td>Baja</td></tr>
+            <tr><td>Madera</td><td>5–10</td><td>−0.5</td><td>Biológica</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>6.3 Optimización Multi-Objetivo con NSGA-II</h3>
+      <p>El algoritmo <strong>NSGA-II (Non-dominated Sorting Genetic Algorithm II)</strong> encuentra el frente de Pareto de soluciones óptimas cuando hay múltiples objetivos en conflicto:</p>
+
+      <div class="equation">
+        min_<strong>x</strong> <strong>F</strong>(<strong>x</strong>) = [f₁(<strong>x</strong>), f₂(<strong>x</strong>), …, fₖ(<strong>x</strong>)]
+        <span class="equation-label">Ec. 6.1 — Problema multi-objetivo</span>
+      </div>
+
+      <p>Para selección de materiales, los objetivos típicos son:</p>
+
+<pre><span class="lang-tag">C++17</span><code><span class="cmt">// Funciones objetivo en conflicto para selección de materiales</span>
+<span class="kw">struct</span> <span class="type">MaterialObjective</span> {
+    <span class="type">double</span> coste_economico;    <span class="cmt">// $/kg</span>
+    <span class="type">double</span> huella_CO2;         <span class="cmt">// kg CO₂/kg</span>
+    <span class="type">double</span> resistencia;        <span class="cmt">// MPa</span>
+    <span class="type">double</span> rigidez;            <span class="cmt">// GPa</span>
+    <span class="type">double</span> densidad;           <span class="cmt">// g/cm³</span>
+    <span class="type">double</span> reciclabilidad;     <span class="cmt">// 0–1</span>
+    <span class="type">double</span> toxicidad;          <span class="cmt">// índice 0–10</span>
+};
+
+<span class="cmt">// NSGA-II busca el frente de Pareto</span>
+<span class="cmt">// Solución A: mínimo coste pero alta huella</span>
+<span class="cmt">// Solución B: mínimo CO₂ pero alto coste</span>
+<span class="cmt">// Solución C: compromiso óptimo</span></code></pre>
+
+      <h3>6.4 Índice de Sostenibilidad de Ashby</h3>
+      <p>Michael Ashby propuso el <strong>índice de material</strong> para minimizar el impacto ambiental:</p>
+
+      <div class="equation">
+        M = σ^½ / (ρ · E_emb)
+        <span class="equation-label">Ec. 6.2 — Índice de material para viga ligera y sostenible</span>
+      </div>
+
+      <p>Donde σ es la resistencia, ρ la densidad y E_emb la energía embebida. Maximizar M implica elegir materiales que ofrezcan la mejor relación resistencia/peso/impacto.</p>
+
+      <div class="callout exercise">
+        <div class="callout-title">🧪 Ejercicio 6.1</div>
+        <p>Usa la herramienta online <em>Ashby Selector</em> de Granta para encontrar 5 materiales que reemplacen el aluminio 6061 en una carcasa de drone, manteniendo rigidez pero reduciendo la huella de carbono en al menos un 30%. Calcula el índice M de Ashby para cada candidato.</p>
+      </div>
+
+      <div class="ref-list">
+        <h4>Referencias Académicas del Capítulo 6</h4>
+        <ol>
+          <li>Newell, J. (2019). Cap. 1: Sustentabilidad e ingeniería verde.</li>
+          <li>Ashby, M. (2012). <em>Materials Selection in Mechanical Design</em>. Butterworth-Heinemann.</li>
+          <li>Deb, K. et al. (2002). <em>A fast and elitist multiobjective genetic algorithm: NSGA-II</em>. IEEE Trans. Evol. Comp.</li>
+          <li>Allwood, J. et al. (2011). <em>First order studies of the possible strategies for reducing CO₂ emissions</em>. Phil. Trans. R. Soc.</li>
+        </ol>
+      </div>
+    </article>
+
+    <!-- ============ CAPÍTULO 7 ============ -->
+    <article class="chapter fade-in" id="cap7">
+      <div class="chapter-header">
+        <div class="num">Capítulo 07 · Parte III</div>
+        <h2>Diseño Generativo y Geometría Cognitiva</h2>
+      </div>
+
+      <p class="chapter-lead">
+        El ingeniero ya no dibuja líneas: escribe restricciones. La IA dibuja la geometría óptima. Este capítulo une el Dibujo Industrial clásico (UNE-EN ISO) con los algoritmos modernos de optimización topológica.
+      </p>
+
+      <h3>7.1 Del Dibujo Industrial al Diseño Generativo</h3>
+      <p>El dibujo industrial clásico se basa en normas UNE-EN ISO:</p>
+      <ul>
+        <li><strong>UNE-EN ISO 5456-2:</strong> Proyecciones normalizadas (primer y tercer diedro)</li>
+        <li><strong>UNE-EN ISO 129-1:</strong> Principios generales de acotación</li>
+        <li><strong>UNE-EN ISO 1101:</strong> Tolerancias geométricas</li>
+        <li><strong>UNE-EN ISO 5455:</strong> Escalas</li>
+        <li><strong>UNE-EN ISO 128-20:</strong> Tipos de líneas y grosores</li>
+      </ul>
+
+      <p>Estas normas definen el <em>lenguaje</em> de la ingeniería. Pero el <em>contenido</em> geométrico ahora lo genera la IA.</p>
+
+      <h3>7.2 Optimización Topológica: Método SIMP</h3>
+      <p>El método <strong>SIMP (Solid Isotropic Material with Penalization)</strong> es el algoritmo más usado en diseño generativo. Divide el espacio de diseño en una malla de elementos finitos y asigna a cada elemento una "densidad relativa" ρₑ ∈ [0, 1]:</p>
+
+      <div class="equation">
+        <strong>K</strong>(ρ) <strong>u</strong> = <strong>f</strong>
+        <span class="equation-label">Ec. 7.1 — Ecuación de equilibrio con rigidez dependiente de la densidad</span>
+      </div>
+
+      <div class="equation">
+        E(ρₑ) = ρₑᵖ · E₀
+        <span class="equation-label">Ec. 7.2 — Interpolación SIMP, p ≈ 3 es el penalizador</span>
+      </div>
+
+      <p>El problema de optimización es:</p>
+
+      <div class="equation">
+        min_ρ C(ρ) = <strong>f</strong>ᵀ <strong>u</strong>   s.a.   ∑ₑ ρₑ · vₑ ≤ V*,   0 &lt; ρ_min ≤ ρₑ ≤ 1
+        <span class="equation-label">Ec. 7.3 — Minimizar cumplimiento con restricción de volumen</span>
+      </div>
+
+      <h3>7.3 Tolerancias ISO Aplicadas al Diseño Generativo</h3>
+      <p>El Dibujo Industrial clásico (UNE 1120-96, ISO 406-1987) define tolerancias mediante el sistema ISO de ajustes:</p>
+
+      <div class="equation">
+        Ajuste = Posición (letra) + Calidad (número)
+        <span class="equation-label">Ec. 7.4 — Sistema ISO de tolerancias, ej: H7/g6</span>
+      </div>
+
+      <p>En el diseño generativo, las tolerancias se reinterpretan:</p>
+      <ul>
+        <li><strong>Tolerancias deterministas:</strong> ±0.1 mm (impresión FDM estándar)</li>
+        <li><strong>Tolerancias probabilistas:</strong> distribución normal 𝒩(μ, σ²)</li>
+        <li><strong>Tolerancias generativas:</strong> la IA garantiza estadísticamente el cumplimiento</li>
+      </ul>
+
+      <div class="callout insight">
+        <div class="callout-title">🔮 Insight</div>
+        <p>Las formas generadas por IA parecen <strong>huesos, raíces o ramas</strong>. No es casualidad: la evolución biológica también optimizó topologías bajo restricciones físicas durante millones de años. La optimización topológica es "evolución comprimida en horas".</p>
+      </div>
+
+      <div class="ref-list">
+        <h4>Referencias Académicas del Capítulo 7</h4>
+        <ol>
+          <li>ULPGC (2004). <em>Dibujo Industrial. Manual de Apoyo y Docencia</em>. Caps. 1–4: Proyecciones, acotación, tolerancias.</li>
+          <li>Bendsøe, M. P. &amp; Sigmund, O. (2003). <em>Topology Optimization: Theory, Methods and Applications</em>. Springer.</li>
+          <li>Sigmund, O. (2001). <em>A 99 line topology optimization code written in Matlab</em>. Struct. Multidisc. Optim.</li>
+          <li>ISO 286-1:2010. <em>ISO system of limits and fits</em>.</li>
+        </ol>
+      </div>
+    </article>
+
+    <!-- ============ CAPÍTULO 8 ============ -->
+    <article class="chapter fade-in" id="cap8">
+      <div class="chapter-header">
+        <div class="num">Capítulo 08 · Parte III</div>
+        <h2>Gemelos Digitales</h2>
+      </div>
+
+      <p class="chapter-lead">
+        Un gemelo digital no es un modelo CAD: es un organismo vivo que respira datos de sensores en tiempo real y predice el futuro de su contraparte física.
+      </p>
+
+      <h3>8.1 Los Cuatro Niveles del Gemelo</h3>
+      <ol>
+        <li><strong>Modelo geométrico:</strong> CAD + tolerancias (Dibujo Industrial clásico).</li>
+        <li><strong>Modelo físico:</strong> FEM/CFD con propiedades de materiales.</li>
+        <li><strong>Modelo de datos:</strong> flujos de sensores en tiempo real.</li>
+        <li><strong>Modelo predictivo:</strong> IA que estima fatiga, fallo, degradación.</li>
+      </ol>
+
+      <h3>8.2 Vida Útil Restante (RUL) con Redes LSTM</h3>
+      <p>La predicción de la <strong>Remaining Useful Life (RUL)</strong> es un problema de regresión secuencial. Las redes LSTM (Long Short-Term Memory) son ideales:</p>
+
+      <div class="equation">
+        <strong>h</strong>ₜ = LSTM(<strong>x</strong>ₜ, <strong>h</strong>ₜ₋₁)
+        <span class="equation-label">Ec. 8.1 — Recurrencia LSTM</span>
+      </div>
+
+      <h3>8.3 Detección de Anomalías con Autoencoders</h3>
+      <p>Un <strong>autoencoder</strong> aprende a reconstruir datos normales. Si la reconstrucción tiene alto error, el dato es anómalo:</p>
+
+      <div class="equation">
+        anomaly_score = || <strong>x</strong> − decoder(encoder(<strong>x</strong>)) ||²
+        <span class="equation-label">Ec. 8.2 — Puntuación de anomalía</span>
+      </div>
+
+      <div class="ref-list">
+        <h4>Referencias Académicas del Capítulo 8</h4>
+        <ol>
+          <li>Grieves, M. (2014). <em>Digital Twin: Manufacturing Excellence through Virtual Factory Replication</em>.</li>
+          <li>Hochreiter, S. &amp; Schmidhuber, J. (1997). <em>Long Short-Term Memory</em>. Neural Computation.</li>
+          <li>Tao, F. et al. (2018). <em>Digital twin in industry: State-of-the-art</em>. IEEE Trans. Ind. Informatics.</li>
+        </ol>
+      </div>
+    </article>
+
+    <!-- ============ CAPÍTULO 9 ============ -->
+    <article class="chapter fade-in" id="cap9">
+      <div class="chapter-header">
+        <div class="num">Capítulo 09 · Parte III</div>
+        <h2>Tolerancias en Manufactura Aditiva</h2>
+      </div>
+
+      <p class="chapter-lead">
+        La impresión 3D rompió las reglas del dibujo industrial tradicional. Las tolerancias ISO ya no son suficientes: necesitamos modelos estadísticos alimentados por IA.
+      </p>
+
+      <h3>9.1 El Problema de la Anisotropía</h3>
+      <p>Una pieza FDM no es isótropa: es más fuerte en el plano XY que en Z. Las tolerancias también varían según:</p>
+      <ul>
+        <li>Orientación de impresión (0°, 45°, 90°)</li>
+        <li>Temperatura del ambiente y de la cama</li>
+        <li>Humedad del filamento (PLA absorbe agua)</li>
+        <li>Desgaste del nozzle (diámetro crece con el uso)</li>
+        <li>Velocidad de impresión y altura de capa</li>
+      </ul>
+
+      <h3>9.2 Modelo Estadístico de Tolerancias FDM</h3>
+      <p>Las dimensiones impresas siguen una distribución normal:</p>
+
+      <div class="equation">
+        d_impresa ~ 𝒩( μ(θ, T, h), σ²(θ, T, h) )
+        <span class="equation-label">Ec. 9.1 — Distribución de dimensiones impresas en función de parámetros</span>
+      </div>
+
+      <p>Donde θ es la orientación, T la temperatura y h la altura de capa.</p>
+
+      <h3>9.3 IA para Control de Calidad en Línea</h3>
+      <p>Cámaras + sensores térmicos monitorean capa por capa. Una CNN detecta defectos en tiempo real:</p>
+
+      <div class="equation">
+        P(defecto | imagen) = σ( <strong>w</strong>ᵀ · φ(imagen) + b )
+        <span class="equation-label">Ec. 9.2 — Clasificador CNN para detección de defectos</span>
+      </div>
+
+      <div class="callout concept">
+        <div class="callout-title">💡 Concepto Clave</div>
+        <p><strong>Tolerancias generativas:</strong> en lugar de fijar ±0.1 mm, se define una <em>distribución probabilística</em> que la IA garantiza estadísticamente. El dibujo industrial del futuro incluye incertidumbre como parte de la especificación.</p>
+      </div>
+
+      <div class="ref-list">
+        <h4>Referencias Académicas del Capítulo 9</h4>
+        <ol>
+          <li>ULPGC (2004). Caps. 5–6: Ajustes y tolerancias, acabados superficiales.</li>
+          <li>ISO/ASTM 52900:2021. <em>Additive manufacturing — General principles</em>.</li>
+          <li>Qian, Y. et al. (2021). <em>In-situ monitoring of FDM</em>. Additive Manufacturing.</li>
+        </ol>
+      </div>
+    </article>
+
+    <!-- ============ CAPÍTULO 10 ============ -->
+    <article class="chapter fade-in" id="cap10">
+      <div class="chapter-header">
+        <div class="num">Capítulo 10 · Parte IV</div>
+        <h2>Por qué la IA del Mundo Real se Escribe en C++</h2>
+      </div>
+
+      <p class="chapter-lead">
+        Python entrena. C++ despliega. La inferencia en producción exige determinismo, control de memoria y cero sorpresas. Como dice Stroustrup: "C++ is a language that you can grow with".
+      </p>
+
+      <h3>10.1 La Trampa de Python en Sistemas Críticos</h3>
+      <p>Python tiene problemas fundamentales en sistemas embebidos y de tiempo real:</p>
+      <ul>
+        <li><strong>GC no determinista:</strong> el recolector de basura puede pausar la ejecución en el peor momento (stop-the-world).</li>
+        <li><strong>Overhead de intérprete:</strong> latencia de microsegundos inaceptable en control de motores.</li>
+        <li><strong>Consumo de memoria:</strong> un runtime de Python puede consumir 50 MB; un MCU tiene 256 KB.</li>
+        <li><strong>Falta de determinismo temporal:</strong> imposible garantizar latencias máximas (WCET).</li>
+      </ul>
+
+      <h3>10.2 Las Ventajas de C++ Moderno (C++17/20/23)</h3>
+      <p>Como explica Stroustrup, C++ combina <strong>abstracción de alto nivel con control de bajo nivel</strong>:</p>
+
+      <div class="equation">
+        Eficiencia de C + Abstracción de alto nivel = C++
+        <span class="equation-label">Ec. 10.1 — Filosofía de diseño de C++</span>
+      </div>
+
+      <h4>10.2.1 RAII: Resource Acquisition Is Initialization</h4>
+      <p>El principio RAII garantiza que ningún recurso se fuga, incluso ante excepciones:</p>
+
+<pre><span class="lang-tag">C++17</span><code><span class="cmt">// RAII aplicado a un sensor IMU</span>
+<span class="kw">class</span> <span class="type">IMU_Sensor</span> {
+    <span class="type">I2C_HandleTypeDef</span>* hi2c;
+    <span class="type">bool</span> initialized = <span class="kw">false</span>;
+
+<span class="kw">public</span>:
+    <span class="kw">explicit</span> <span class="type">IMU_Sensor</span>(<span class="type">I2C_HandleTypeDef</span>* h) : hi2c(h) {
+        <span class="fn">init_sensor</span>(hi2c);
+        initialized = <span class="kw">true</span>;
+    }
+
+    ~<span class="type">IMU_Sensor</span>() {
+        <span class="kw">if</span> (initialized) <span class="fn">power_down</span>(hi2c);
+    }
+
+    <span class="type">IMU_Sensor</span>(<span class="kw">const</span> <span class="type">IMU_Sensor</span>&amp;) = <span class="kw">delete</span>;
+    <span class="type">IMU_Sensor</span>&amp; <span class="kw">operator</span>=(<span class="kw">const</span> <span class="type">IMU_Sensor</span>&amp;) = <span class="kw">delete</span>;
+
+    <span class="type">IMU_Sensor</span>(<span class="type">IMU_Sensor</span>&amp;&amp; other) <span class="kw">noexcept</span> {
+        hi2c = other.hi2c;
+        initialized = other.initialized;
+        other.initialized = <span class="kw">false</span>;
+    }
+};</code></pre>
+
+      <h4>10.2.2 Templates y Metaprogramación</h4>
+      <p>Los templates permiten escribir código genérico sin overhead en tiempo de ejecución:</p>
+
+<pre><span class="lang-tag">C++17</span><code><span class="cmt">// Red neuronal feed-forward con templates (zero-cost abstraction)</span>
+<span class="kw">template</span>&lt;<span class="kw">typename</span> <span class="type">T</span>, <span class="type">size_t</span> In, <span class="type">size_t</span> H1, <span class="type">size_t</span> H2, <span class="type">size_t</span> Out&gt;
+<span class="kw">struct</span> <span class="type">MLP</span> {
+    <span class="type">std::array</span>&lt;<span class="type">T</span>, In*H1&gt;  w1;
+    <span class="type">std::array</span>&lt;<span class="type">T</span>, H1&gt;     b1;
+    <span class="type">std::array</span>&lt;<span class="type">T</span>, H1*H2&gt;  w2;
+    <span class="type">std::array</span>&lt;<span class="type">T</span>, H2&gt;     b2;
+    <span class="type">std::array</span>&lt;<span class="type">T</span>, H2*Out&gt; w3;
+    <span class="type">std::array</span>&lt;<span class="type">T</span>, Out&gt;    b3;
+
+    <span class="kw">constexpr</span> <span class="type">std::array</span>&lt;<span class="type">T</span>, Out&gt; <span class="fn">forward</span>(<span class="kw">const</span> <span class="type">std::array</span>&lt;<span class="type">T</span>, In&gt;&amp; x) <span class="kw">const</span> {
+        <span class="kw">auto</span> h1 = <span class="fn">relu</span>(<span class="fn">matmul</span>&lt;In,H1&gt;(x, w1, b1));
+        <span class="kw">auto</span> h2 = <span class="fn">relu</span>(<span class="fn">matmul</span>&lt;H1,H2&gt;(h1, w2, b2));
+        <span class="kw">return</span> <span class="fn">softmax</span>(<span class="fn">matmul</span>&lt;H2,Out&gt;(h2, w3, b3));
+    }
+};
+
+<span class="cmt">// Uso: MLP&lt;float, 6, 32, 16, 3&gt; gesture_model;</span></code></pre>
+
+      <h3>10.3 STL: La Biblioteca Estándar como Base</h3>
+      <p>Stroustrup enfatiza: <em>"The standard library can be used to provide realistic and interesting examples well before a reader can be assumed to understand its inner workings"</em>.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Componente STL</th><th>Uso en IA Física</th></tr></thead>
+          <tbody>
+            <tr><td>std::vector</td><td>Buffers de sensores, tensores 1D</td></tr>
+            <tr><td>std::array</td><td>Datos de tamaño fijo (weights de red)</td></tr>
+            <tr><td>std::unique_ptr</td><td>Gestión de modelos de IA</td></tr>
+            <tr><td>std::function</td><td>Callbacks de eventos de sensores</td></tr>
+            <tr><td>std::thread</td><td>Paralelismo en inferencia</td></tr>
+            <tr><td>std::atomic</td><td>Variables compartidas en tiempo real</td></tr>
+            <tr><td>std::optional</td><td>Datos de sensores que pueden fallar</td></tr>
+            <tr><td>std::variant</td><td>Tipos de datos heterogéneos</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-title">⚠️ Regla de Oro</div>
+        <p>Nunca uses <code>new</code> y <code>delete</code> desnudos en sistemas embebidos con IA. Usa <code>std::unique_ptr</code>, <code>std::vector</code> o contenedores con allocator estático. Como dice Stroustrup: <em>"a high-quality library is a library that provides a concept to a user in a form that is convenient, safe, and efficient to use"</em>.</p>
+      </div>
+
+      <div class="ref-list">
+        <h4>Referencias Académicas del Capítulo 10</h4>
+        <ol>
+          <li>Stroustrup, B. (2013). <em>The C++ Programming Language</em>, 4th Ed. Addison-Wesley. Caps. 2–5, 13, 28, 30–34.</li>
+          <li>Stroustrup, B. (2018). <em>A Tour of C++</em>, 2nd Ed. Addison-Wesley.</li>
+          <li>Meyers, S. (2014). <em>Effective Modern C++</em>. O'Reilly.</li>
+          <li>ISO/IEC 14882:2020. <em>Programming languages — C++</em>.</li>
+        </ol>
+      </div>
+    </article>
+
+    <!-- ============ CAPÍTULO 11 ============ -->
+    <article class="chapter fade-in" id="cap11">
+      <div class="chapter-header">
+        <div class="num">Capítulo 11 · Parte IV</div>
+        <h2>C++ para Robótica y Visión por Computador</h2>
+      </div>
+
+      <p class="chapter-lead">
+        ROS 2, OpenCV, PCL, libtorch: todo el ecosistema de IA robótica está escrito en C++. Aprenderlo no es opcional.
+      </p>
+
+      <h3>11.1 Integración PyTorch ↔ C++ (LibTorch)</h3>
+      <p>Puedes entrenar en Python y desplegar en C++ con el mismo modelo. LibTorch es la API C++ de PyTorch:</p>
+
+<pre><span class="lang-tag">C++17</span><code><span class="pp">#include</span> <span class="str">&lt;torch/script.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;opencv2/opencv.hpp&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;iostream&gt;</span>
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    <span class="type">torch::jit::script::Module</span> model;
+    <span class="kw">try</span> {
+        model = <span class="fn">torch::jit::load</span>(<span class="str">"resnet18_traced.pt"</span>);
+    } <span class="kw">catch</span> (<span class="kw">const</span> <span class="type">c10::Error</span>&amp; e) {
+        <span class="fn">std::cerr</span> &lt;&lt; <span class="str">"Error loading model\n"</span>;
+        <span class="kw">return</span> -<span class="num">1</span>;
+    }
+    model.<span class="fn">eval</span>();
+
+    cv::Mat img = cv::<span class="fn">imread</span>(<span class="str">"robot_view.jpg"</span>);
+    cv::<span class="fn">cvtColor</span>(img, img, cv::COLOR_BGR2RGB);
+    cv::<span class="fn">resize</span>(img, img, cv::<span class="fn">Size</span>(<span class="num">224</span>, <span class="num">224</span>));
+
+    <span class="type">torch::Tensor</span> tensor = <span class="fn">torch::from_blob</span>(
+        img.data, {<span class="num">1</span>, <span class="num">3</span>, <span class="num">224</span>, <span class="num">224</span>}, <span class="type">torch::kFloat</span>);
+    tensor = tensor.<span class="fn">div</span>(<span class="num">255.0</span>);
+    tensor = torch::<span class="fn">nn</span>::<span class="fn">functional</span>::<span class="fn">normalize</span>(
+        tensor, <span class="fn">torch::nn</span>::<span class="fn">functional</span>::<span class="fn">NormalizeFuncOptions</span>()
+            .<span class="fn">mean</span>({<span class="num">0.485</span>, <span class="num">0.456</span>, <span class="num">0.406</span>})
+            .<span class="fn">std</span>({<span class="num">0.229</span>, <span class="num">0.224</span>, <span class="num">0.225</span>}));
+
+    <span class="kw">auto</span> output = model.<span class="fn">forward</span>({tensor}).<span class="fn">toTensor</span>();
+    <span class="kw">auto</span> probs = torch::<span class="fn">nn</span>::<span class="fn">functional</span>::<span class="fn">softmax</span>(output, <span class="num">1</span>);
+    <span class="kw">auto</span> cls = probs.<span class="fn">argmax</span>(<span class="num">1</span>).<span class="fn">item</span>&lt;<span class="type">int64_t</span>&gt;();
+    <span class="kw">auto</span> conf = probs[<span class="num">0</span>][cls].<span class="fn">item</span>&lt;<span class="type">float</span>&gt;();
+
+    <span class="fn">std::cout</span> &lt;&lt; <span class="str">"Clase: "</span> &lt;&lt; cls &lt;&lt; <span class="str">", Confianza: "</span> &lt;&lt; conf &lt;&lt; <span class="str">"\n"</span>;
+}</code></pre>
+
+      <h3>11.2 ROS 2: El Sistema Nervioso del Robot</h3>
+      <p>ROS 2 (Robot Operating System) usa <strong>DDS (Data Distribution Service)</strong> para comunicación en tiempo real entre nodos:</p>
+
+      <div class="equation">
+        Nodoᵢ →[Topic]→ Nodoⱼ  (pub/sub)
+        <span class="equation-label">Ec. 11.1 — Comunicación DDS en ROS 2</span>
+      </div>
+
+      <h3>11.3 Zero-Copy Sharing</h3>
+      <p>ROS 2 permite compartir tensores entre nodos sin copiar memoria:</p>
+
+<pre><span class="lang-tag">C++17</span><code><span class="cmt">// Nodo ROS 2 para procesamiento de imagen con zero-copy</span>
+<span class="pp">#include</span> <span class="str">"rclcpp/rclcpp.hpp"</span>
+<span class="pp">#include</span> <span class="str">"sensor_msgs/msg/image.hpp"</span>
+
+<span class="kw">class</span> <span class="type">VisionNode</span> : <span class="kw">public</span> rclcpp::Node {
+    rclcpp::<span class="type">Subscription</span>&lt;sensor_msgs::msg::Image&gt;::<span class="type">SharedPtr</span> sub_;
+    rclcpp::<span class="type">Publisher</span>&lt;sensor_msgs::msg::Image&gt;::<span class="type">SharedPtr</span> pub_;
+    <span class="type">torch::jit::script::Module</span> model_;
+
+<span class="kw">public</span>:
+    <span class="type">VisionNode</span>() : <span class="fn">Node</span>(<span class="str">"vision_node"</span>) {
+        sub_ = <span class="fn">create_subscription</span>&lt;sensor_msgs::msg::Image&gt;(
+            <span class="str">"/camera/image_raw"</span>, <span class="num">10</span>,
+            [<span class="kw">this</span>](<span class="kw">const</span> <span class="kw">auto</span>&amp; msg) { <span class="fn">image_callback</span>(msg); });
+        pub_ = <span class="fn">create_publisher</span>&lt;sensor_msgs::msg::Image&gt;(
+            <span class="str">"/vision/detections"</span>, <span class="num">10</span>);
+        model_ = <span class="fn">torch::jit::load</span>(<span class="str">"yolo_nano.pt"</span>);
+    }
+
+<span class="kw">private</span>:
+    <span class="type">void</span> <span class="fn">image_callback</span>(<span class="kw">const</span> sensor_msgs::msg::Image&amp; msg) {
+        cv::Mat frame(msg.height, msg.width, CV_8UC3,
+                      <span class="kw">const_cast</span>&lt;<span class="type">uint8_t</span>*&gt;(msg.data.<span class="fn">data</span>()));
+
+        <span class="kw">auto</span> detections = <span class="fn">run_inference</span>(frame);
+        <span class="fn">publish_detections</span>(detections);
+    }
+};</code></pre>
+
+      <div class="callout concept">
+        <div class="callout-title">💡 Concepto Clave</div>
+        <p><strong>Zero-copy sharing:</strong> ROS 2 permite compartir tensores entre nodos sin copiar memoria. Una imagen de 4K (25 MB) se pasa por referencia en nanosegundos. Esto es crítico para pipelines de visión en tiempo real.</p>
+      </div>
+
+      <div class="ref-list">
+        <h4>Referencias Académicas del Capítulo 11</h4>
+        <ol>
+          <li>Stroustrup, B. (2013). Cap. 31–33: STL Containers, Algorithms.</li>
+          <li>Quigley, M. et al. (2015). <em>Programming Robots with ROS</em>. O'Reilly.</li>
+          <li>Macenski, S. et al. (2022). <em>Robot Operating System 2: Design, architecture, and uses in the wild</em>. Science Robotics.</li>
+          <li>Bradski, G. &amp; Kaehler, A. (2008). <em>Learning OpenCV</em>. O'Reilly.</li>
+        </ol>
+      </div>
+    </article>
+
+    <!-- ============ CAPÍTULO 12 ============ -->
+    <article class="chapter fade-in" id="cap12">
+      <div class="chapter-header">
+        <div class="num">Capítulo 12 · Parte IV</div>
+        <h2>TinyML: IA en Microcontroladores</h2>
+      </div>
+
+      <p class="chapter-lead">
+        256 KB de RAM. 100 MHz. Y aún así, inferencia de IA en tiempo real. Bienvenido al mundo del TinyML.
+      </p>
+
+      <h3>12.1 El Arte de lo Imposible</h3>
+      <p>Un modelo de ResNet-50 ocupa 100 MB. Un Arduino Nano tiene 2 KB de RAM. ¿Cómo es posible? Mediante:</p>
+
+      <h4>12.1.1 Cuantización</h4>
+      <p>Reducir los pesos de 32 bits (float32) a 8 bits (int8):</p>
+
+      <div class="equation">
+        q = round(x/s) + z
+        <span class="equation-label">Ec. 12.1 — Cuantización asimétrica, s es la escala y z el zero-point</span>
+      </div>
+
+      <p>Esto reduce el tamaño del modelo en 4× y acelera la inferencia (las operaciones INT8 son más rápidas que FLOAT32 en MCUs sin FPU).</p>
+
+      <h4>12.1.2 Pruning</h4>
+      <p>Eliminar conexiones con pesos cercanos a cero:</p>
+
+      <div class="equation">
+        wᵢⱼ = { wᵢⱼ si |wᵢⱼ| > τ, 0 en otro caso }
+        <span class="equation-label">Ec. 12.2 — Pruning por magnitud con umbral τ</span>
+      </div>
+
+      <h4>12.1.3 Knowledge Distillation</h4>
+      <p>Un modelo pequeño (estudiante) aprende de uno grande (profesor):</p>
+
+      <div class="equation">
+        ℒ = α · CE(y, ŷₛ) + (1−α) · T² · KL(pₜ || pₛ)
+        <span class="equation-label">Ec. 12.3 — Loss de distillation (Hinton et al., 2015)</span>
+      </div>
+
+      <h3>12.2 Flujo de Trabajo Completo</h3>
+<pre><span class="lang-tag">Bash</span><code><span class="cmt"># 1. Entrenar en Python</span>
+python train.py --model=mobilenet_v2 --epochs=50 --dataset=gestures
+
+<span class="cmt"># 2. Convertir a TensorFlow Lite con cuantización</span>
+tflite_convert --keras_model_file=model.h5 \
+               --output_file=model.tflite \
+               --inference_type=QUANTIZED_UINT8
+
+<span class="cmt"># 3. Convertir a header C para Arduino</span>
+xxd -i model.tflite &gt; model.h
+
+<span class="cmt"># 4. Compilar con Arduino IDE o PlatformIO</span>
+pio run -e arduino_nano33ble
+
+<span class="cmt"># 5. Flashear</span>
+pio run -e arduino_nano33ble -t upload</code></pre>
+
+      <h3>12.3 Caso: Detección de Palabras Clave</h3>
+      <p>El proyecto <em>Magic Wand</em> de TensorFlow reconoce gestos de una varita con un acelerómetro y un modelo de 18 KB. Funciona con una batería de botón durante meses.</p>
+
+      <h4>12.3.1 Modelo en C++ para Arduino</h4>
+<pre><span class="lang-tag">C++17</span><code><span class="cmt">// Inferencia TinyML en Arduino Nano 33 BLE Sense</span>
+<span class="pp">#include</span> <span class="str">&lt;TensorFlowLite.h&gt;</span>
+<span class="pp">#include</span> <span class="str">"model.h"</span>
+
+<span class="kw">constexpr</span> <span class="type">int</span> kTensorArenaSize = <span class="num">60</span> * <span class="num">1024</span>;
+<span class="kw">alignas</span>(<span class="num">16</span>) <span class="type">uint8_t</span> tensor_arena[kTensorArenaSize];
+
+<span class="type">tflite::ErrorReporter</span>* error_reporter = <span class="kw">nullptr</span>;
+<span class="kw">const</span> <span class="type">tflite::Model</span>* model = <span class="kw">nullptr</span>;
+<span class="type">tflite::MicroInterpreter</span>* interpreter = <span class="kw">nullptr</span>;
+
+<span class="type">void</span> <span class="fn">setup</span>() {
+    <span class="kw">static</span> <span class="type">tflite::MicroErrorReporter</span> micro_error_reporter;
+    error_reporter = &amp;micro_error_reporter;
+
+    model = <span class="fn">tflite::GetModel</span>(gesture_model_tflite);
+    <span class="kw">static</span> <span class="type">tflite::AllOpsResolver</span> resolver;
+    <span class="kw">static</span> <span class="type">tflite::MicroInterpreter</span> static_interpreter(
+        model, resolver, tensor_arena, kTensorArenaSize, error_reporter);
+    interpreter = &amp;static_interpreter;
+
+    interpreter-&gt;<span class="fn">AllocateTensors</span>();
+}
+
+<span class="type">void</span> <span class="fn">loop</span>() {
+    <span class="type">float</span> input_data[<span class="num">128</span> * <span class="num">3</span>];
+    <span class="fn">capture_imu_window</span>(input_data);
+
+    <span class="type">TfLiteTensor</span>* input = interpreter-&gt;<span class="fn">input</span>(<span class="num">0</span>);
+    <span class="fn">memcpy</span>(input-&gt;data.<span class="fn">int8</span>, input_data, <span class="kw">sizeof</span>(input_data));
+
+    interpreter-&gt;<span class="fn">Invoke</span>();
+
+    <span class="type">TfLiteTensor</span>* output = interpreter-&gt;<span class="fn">output</span>(<span class="num">0</span>);
+    <span class="type">int8_t</span> wing_score = output-&gt;data.<span class="fn">int8</span>[<span class="num">0</span>];
+    <span class="type">int8_t</span> ring_score = output-&gt;data.<span class="fn">int8</span>[<span class="num">1</span>];
+    <span class="type">int8_t</span> slope_score = output-&gt;data.<span class="fn">int8</span>[<span class="num">2</span>];
+
+    <span class="kw">if</span> (wing_score &gt; <span class="num">100</span>) <span class="fn">actuate_wing</span>();
+    <span class="kw">else if</span> (ring_score &gt; <span class="num">100</span>) <span class="fn">actuate_ring</span>();
+    <span class="kw">else if</span> (slope_score &gt; <span class="num">100</span>) <span class="fn">actuate_slope</span>();
+}</code></pre>
+
+      <div class="callout insight">
+        <div class="callout-title">🔮 Insight</div>
+        <p>El futuro de la IA no está en modelos cada vez más grandes, sino en <strong>modelos diminutos distribuidos en billones de dispositivos</strong>. Cada sensor será inteligente. Cada actuador tendrá un cerebro. Cada material tendrá un sistema nervioso.</p>
+      </div>
+
+      <div class="ref-list">
+        <h4>Referencias Académicas del Capítulo 12</h4>
+        <ol>
+          <li>Warden, P. &amp; Situnayake, D. (2019). <em>TinyML: Machine Learning with TensorFlow Lite</em>. O'Reilly.</li>
+          <li>Hinton, G. et al. (2015). <em>Distilling the Knowledge in a Neural Network</em>. NeurIPS Workshop.</li>
+          <li>Han, S. et al. (2015). <em>Learning both Weights and Connections for Efficient Neural Networks</em>. NeurIPS.</li>
+          <li>Jacob, B. et al. (2018). <em>Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference</em>. CVPR.</li>
+        </ol>
+      </div>
+    </article>
+
+    <!-- ============ CAPÍTULO 13 ============ -->
+    <article class="chapter fade-in" id="cap13">
+      <div class="chapter-header">
+        <div class="num">Capítulo 13 · Parte V</div>
+        <h2>Proyecto Integrador: El Organismo Completo</h2>
+      </div>
+
+      <p class="chapter-lead">
+        Es hora de unir todo. Diseñaremos, fabricaremos, programaremos y desplegaremos un robot autónomo que aprende de su entorno.
+      </p>
+
+      <h3>13.1 El Reto</h3>
+      <p>Construir un <strong>robot explorador de interiores</strong> que:</p>
+      <ul>
+        <li>Se imprima en 3D con PETG reciclado (sostenibilidad)</li>
+        <li>Tenga topología optimizada (diseño generativo)</li>
+        <li>Navegue con lidar + IMU + cámara (fusión sensorial)</li>
+        <li>Ejecute SLAM + detección de objetos en una Raspberry Pi 4</li>
+        <li>Use Arduino para control de motores en tiempo real</li>
+        <li>Aprenda a reconocer objetos específicos mediante TinyML</li>
+      </ul>
+
+      <h3>13.2 Arquitectura del Sistema</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 540 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Arquitectura del robot explorador">
+          <rect x="20" y="20" width="500" height="280" rx="12" fill="none" stroke="#06b6d4" stroke-dasharray="6,4"/>
+          <text x="270" y="48" text-anchor="middle" fill="#06b6d4" font-size="13" font-weight="bold">ROBOT EXPLORADOR CIBERFÍSICO</text>
+
+          <rect x="50" y="75" width="120" height="60" rx="8" fill="#10b981" opacity="0.15" stroke="#10b981" stroke-width="1.5"/>
+          <text x="110" y="102" text-anchor="middle" fill="var(--text)" font-size="12" font-weight="bold">Cuerpo</text>
+          <text x="110" y="122" text-anchor="middle" fill="var(--text-dim)" font-size="10">PETG + topología</text>
+
+          <rect x="210" y="75" width="120" height="60" rx="8" fill="#06b6d4" opacity="0.15" stroke="#06b6d4" stroke-width="1.5"/>
+          <text x="270" y="102" text-anchor="middle" fill="var(--text)" font-size="12" font-weight="bold">Sentidos</text>
+          <text x="270" y="122" text-anchor="middle" fill="var(--text-dim)" font-size="10">Lidar + IMU + Cam</text>
+
+          <rect x="370" y="75" width="120" height="60" rx="8" fill="#f59e0b" opacity="0.15" stroke="#f59e0b" stroke-width="1.5"/>
+          <text x="430" y="102" text-anchor="middle" fill="var(--text)" font-size="12" font-weight="bold">Cerebelo</text>
+          <text x="430" y="122" text-anchor="middle" fill="var(--text-dim)" font-size="10">Arduino (C++)</text>
+
+          <rect x="130" y="185" width="120" height="60" rx="8" fill="#8b5cf6" opacity="0.15" stroke="#8b5cf6" stroke-width="1.5"/>
+          <text x="190" y="212" text-anchor="middle" fill="var(--text)" font-size="12" font-weight="bold">Corteza</text>
+          <text x="190" y="232" text-anchor="middle" fill="var(--text-dim)" font-size="10">RPi 4 (ROS 2)</text>
+
+          <rect x="290" y="185" width="120" height="60" rx="8" fill="#ef4444" opacity="0.15" stroke="#ef4444" stroke-width="1.5"/>
+          <text x="350" y="212" text-anchor="middle" fill="var(--text)" font-size="12" font-weight="bold">IA</text>
+          <text x="350" y="232" text-anchor="middle" fill="var(--text-dim)" font-size="10">SLAM + YOLO</text>
+
+          <path d="M 110 135 L 190 185" stroke="#6b7280" stroke-width="1.5"/>
+          <path d="M 270 135 L 270 185" stroke="#6b7280" stroke-width="1.5"/>
+          <path d="M 430 135 L 350 185" stroke="#6b7280" stroke-width="1.5"/>
+          <path d="M 260 215 L 290 215" stroke="#ef4444" stroke-width="2"/>
+        </svg>
+        <div class="diagram-caption">Figura 13.1 — Arquitectura completa del organismo ciberfísico</div>
+      </div>
+
+      <h3>13.3 Selección de Materiales (IA + Ashby)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Componente</th><th>Material</th><th>E (GPa)</th><th>σ_y (MPa)</th><th>ρ (g/cm³)</th><th>Razón</th></tr></thead>
+          <tbody>
+            <tr><td>Chasis</td><td>PETG reciclado</td><td>2.0</td><td>45</td><td>1.27</td><td>Sostenible, tenaz, imprimible</td></tr>
+            <tr><td>Soporte sensores</td><td>PLA + fibra carbono</td><td>8.0</td><td>80</td><td>1.30</td><td>Rigidez + ligereza</td></tr>
+            <tr><td>Engranajes</td><td>Nylon (PA12)</td><td>1.5</td><td>60</td><td>1.01</td><td>Resistencia al desgaste</td></tr>
+            <tr><td>Carcasa electrónica</td><td>PC/ABS</td><td>2.3</td><td>48</td><td>1.10</td><td>Resistencia térmica</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>13.4 Código de Control en C++ (Arduino)</h3>
+<pre><span class="lang-tag">C++17</span><code><span class="cmt">// Control PID + fusión sensorial + navegación</span>
+<span class="kw">class</span> <span class="type">RobotController</span> {
+    <span class="type">PID</span> pid_left_{<span class="num">2.0</span>, <span class="num">5.0</span>, <span class="num">0.1</span>};
+    <span class="type">PID</span> pid_right_{<span class="num">2.0</span>, <span class="num">5.0</span>, <span class="num">0.1</span>};
+    <span class="type">KalmanPitch</span> kalman_pitch_;
+    <span class="type">Encoder</span> enc_l_, enc_r_;
+    <span class="type">IMU</span> imu_;
+    <span class="type">Lidar</span> lidar_;
+
+<span class="kw">public</span>:
+    <span class="type">void</span> <span class="fn">update</span>(<span class="type">float</span> target_v, <span class="type">float</span> target_omega) {
+        <span class="kw">auto</span> [ax, ay, az, gx, gy, gz] = imu_.<span class="fn">read</span>();
+        <span class="type">float</span> pitch = kalman_.<span class="fn">update</span>(<span class="fn">accel_to_pitch</span>(ax, az), gx, <span class="num">0.01</span>);
+        <span class="kw">auto</span> distances = lidar_.<span class="fn">scan</span>();
+
+        <span class="kw">auto</span> [wl, wr] = <span class="fn">diff_to_wheel_speeds</span>(target_v, target_omega);
+
+        <span class="type">float</span> ul = pid_left_.<span class="fn">compute</span>(wl, enc_l_.<span class="fn">velocity</span>());
+        <span class="type">float</span> ur = pid_right_.<span class="fn">compute</span>(wr, enc_r_.<span class="fn">velocity</span>());
+
+        motor_l_.<span class="fn">set_pwm</span>(ul);
+        motor_r_.<span class="fn">set_pwm</span>(ur);
+
+        <span class="fn">publish_odometry</span>(enc_l_, enc_r_, pitch);
+        <span class="fn">publish_lidar_scan</span>(distances);
+    }
+};</code></pre>
+
+      <h3>13.5 Despliegue del Modelo de IA</h3>
+      <p>El modelo YOLOv8-nano se ejecuta en la Raspberry Pi 4 con <strong>OpenVINO</strong> o <strong>TFLite</strong>, alcanzando 15 FPS. Fusiona datos del lidar (SLAM) con detección visual para construir un mapa semántico del entorno.</p>
+
+      <div class="callout exercise">
+        <div class="callout-title">🧪 Proyecto Final</div>
+        <p>Construye tu propio organismo ciberfísico. Documenta cada decisión: por qué ese material, por qué esa topología, por qué ese sensor, por qué ese modelo. Esa documentación <strong>es</strong> la nueva ingeniería.</p>
+      </div>
+
+      <h3>13.6 Epílogo: El Ingeniero del Futuro</h3>
+      <p>Ya no existe el "ingeniero mecánico puro" ni el "programador puro". El ingeniero del futuro es un <strong>arquitecto de organismos ciberfísicos</strong>: alguien que entiende cómo un polímero se deforma bajo carga, cómo una red neuronal aprende de esa deformación, cómo un sensor la mide, y cómo un algoritmo en C++ reacciona en microsegundos.</p>
+
+      <blockquote>
+        "La inteligencia no habita en el código ni en el silicio. Habita en la danza entre ambos."
+        <cite>— E. E. Bonillo</cite>
+      </blockquote>
+    </article>
+
+    <!-- ============ BIBLIOGRAFÍA ============ -->
+    <article class="chapter fade-in" id="biblio">
+      <div class="chapter-header">
+        <div class="num">Anexos</div>
+        <h2>Bibliografía General</h2>
+      </div>
+
+      <div class="ref-list">
+        <h4>Obras Fundamentales Consultadas</h4>
+        <ol>
+          <li><strong>Stroustrup, B.</strong> (2013). <em>The C++ Programming Language</em>, 4th Edition. Addison-Wesley. ISBN: 978-0-321-56384-2.</li>
+          <li><strong>Newell, J.</strong> (2019). <em>Ciencia de Materiales: Aplicaciones en Ingeniería</em>, 1ª Edición. Alfaomega. ISBN: 978-607-707-114-3.</li>
+          <li><strong>Karvinen, K. &amp; Karvinen, T.</strong> (2014). <em>Getting Started with Sensors: Measure the World with Electronics, Arduino, and Raspberry Pi</em>. Maker Media. ISBN: 978-1-4493-6708-4.</li>
+          <li><strong>ULPGC</strong> (2004). <em>Dibujo Industrial. Manual de Apoyo y Docencia</em>. Universidad de las Palmas de Gran Canaria. ISBN: 84-7806-295-5.</li>
+        </ol>
+      </div>
+
+      <div class="ref-list">
+        <h4>Referencias Complementarias</h4>
+        <ol>
+          <li>Callister, W. D. &amp; Rethwisch, D. G. (2014). <em>Materials Science and Engineering: An Introduction</em>. Wiley.</li>
+          <li>Ashby, M. (2012). <em>Materials Selection in Mechanical Design</em>. Butterworth-Heinemann.</li>
+          <li>Bendsøe, M. P. &amp; Sigmund, O. (2003). <em>Topology Optimization</em>. Springer.</li>
+          <li>Oppenheim, A. V. &amp; Schafer, R. W. (2014). <em>Discrete-Time Signal Processing</em>. Pearson.</li>
+          <li>Warden, P. &amp; Situnayake, D. (2019). <em>TinyML</em>. O'Reilly.</li>
+          <li>Meyers, S. (2014). <em>Effective Modern C++</em>. O'Reilly.</li>
+          <li>Goodfellow, I. et al. (2016). <em>Deep Learning</em>. MIT Press.</li>
+          <li>Kalman, R. E. (1960). <em>A New Approach to Linear Filtering</em>. Trans. ASME.</li>
+          <li>Vaswani, A. et al. (2017). <em>Attention Is All You Need</em>. NeurIPS.</li>
+          <li>ISO/IEC 14882:2020. <em>Programming languages — C++</em>.</li>
+          <li>ISO 286-1:2010. <em>ISO system of limits and fits</em>.</li>
+          <li>ISO/ASTM 52900:2021. <em>Additive manufacturing — General principles</em>.</li>
+        </ol>
+      </div>
+    </article>
+
+  </main>
+</div>
+
+<footer>
+  <p><strong>Arquitectura de la Inteligencia Física</strong> · Tratado de Ingeniería Ciberfísica</p>
+  <p>Autor: <strong>Profesor Etalides E. Bonillo</strong></p>
+  <p>Basado en las obras de B. Stroustrup (C++), J. Newell (Materiales), K. &amp; T. Karvinen (Sensores) y ULPGC (Dibujo Industrial)</p>
+  <p style="margin-top:1.2rem;font-size:0.8rem;opacity:0.7">© 2026 · Edición Académica Integral · Junio 2026</p>
+</footer>
+
+<script>
+  (function() {
+    const toggle = document.getElementById('themeToggle');
+    toggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      toggle.textContent = next === 'light' ? '☀️' : '🌙';
+    });
+
+    const bar = document.getElementById('progressBar');
+    window.addEventListener('scroll', () => {
+      const h = document.documentElement;
+      const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+      bar.style.width = pct + '%';
+    });
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) e.target.classList.add('visible');
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Smooth scroll for sidebar links
+    document.querySelectorAll('.toc a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
